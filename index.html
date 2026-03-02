@@ -43,7 +43,7 @@
             <div class="log-line">Type "help" for a list of all possible commands.</div>
         </div>
         <div class="input-area">
-            <span class="prompt" id="prompt-text">C:\Users\cheddar></span>
+            <span class="prompt" id="prompt-text">C:\Users\cheddar-hobbs></span>
             <div class="input-wrapper">
                 <input type="text" id="terminalInput" autofocus spellcheck="false" autocomplete="off">
                 <div id="ghost-input"></div>
@@ -52,7 +52,11 @@
     </div>
 
     <script>
-        const OS_VERSION = "[vBETA-1.0.10]";
+        
+        // ============================================================ \\
+                            // CHEDDAROS VERSION \\
+                         const OS_VERSION = "vBETA-1.1.0";
+        // ============================================================ \\
 
         document.getElementById("page-title").innerText = "CheddarOS " + OS_VERSION;
         document.getElementById("version-line").innerText = "CheddarOS " + OS_VERSION;
@@ -237,22 +241,30 @@
                 );
             }
             else if (userInput === "changelog") {
-                outputBlock.innerHTML += changelog(
-                    "--- CHANGELOG ---",
-                    "2/27/2026$vBETA-1.0.10$- Added Buckshot Roulette$- Buckshot Roulette offline while working on GoGuardian bypass",
-                    "2/27/2026$vBETA-1.0.9$- Added Wrestle Bros$- Wrestle Bros offline while working on GoGuardian bypass",
-                    "2/27/2026$vBETA-1.0.8$- Formatted the credits screen",
-                    "2/26/2026$vBETA-1.0.7$- Added Shell Shockers$- Shell Shockers offline while working on GoGuardian bypass",
-                    "2/26/2025$vBETA-1.0.6$- Added Retro Bowl",
-                    "2/26/2026$vBETA-1.0.5b$- Minor bug fixes$- Cut the loading speed in half for all current and future games.",
-                    "2/25/2026$vBETA-1.0.5$- Throw a Potato is finally fixed$- Removed ads inside Throw a Potato$- FNaE revamp$- Fixed Snow Rider 3D black screen after the loading was complete",
-                    "2/25/2026$vBETA-1.0.4$- FNaE back online",
-                    "2/25/2026$vBETA-1.0.3$- FNaE taken offline$- Throw a Potato back offline cause of GoGuardian",
-                    "2/23/2026$vBETA-1.0.2$- Minor big fixes$- Throw a Potato now playable (sorry about the ads)$- Added Snow Rider 3D but currently being worked on",
-                    "2/23/2026$vBETA-1.0.1$- Throw a Potato put under maintenance due to a fatal error",
-                    "2/23/2026$vBETA-1.0.0$- CheddarOS public beta testing release."
-                );
-            }
+                
+        // ============================================================ \\
+                            // CHEDDAROS UPDATE LOG \\
+
+                else if (userInput === "changelog") {
+                    outputBlock.innerHTML += changelog(
+                        "--- CHANGELOG ---",
+                        "2/27/2026$vBETA-1.0.10$- Added Buckshot Roulette$- Buckshot Roulette offline while working on GoGuardian bypass", // Added comma
+                        "2/27/2026$vBETA-1.0.9$- Added Wrestle Bros$- Wrestle Bros offline while working on GoGuardian bypass",
+                        "2/27/2026$vBETA-1.0.8$- Formatted the credits screen",
+                        "2/26/2026$vBETA-1.0.7$- Added Shell Shockers$- Shell Shockers offline while working on GoGuardian bypass",
+                        "2/26/2025$vBETA-1.0.6$- Added Retro Bowl",
+                        "2/26/2026$vBETA-1.0.5b$- Minor bug fixes$- Cut the loading speed in half for all current and future games.",
+                        "2/25/2026$vBETA-1.0.5$- Throw a Potato is finally fixed$- Removed ads inside Throw a Potato$- FNaE revamp$- Fixed Snow Rider 3D black screen after the loading was complete",
+                        "2/25/2026$vBETA-1.0.4$- FNaE back online",
+                        "2/25/2026$vBETA-1.0.3$- FNaE taken offline$- Throw a Potato back offline cause of GoGuardian",
+                        "2/23/2026$vBETA-1.0.2$- Minor big fixes$- Throw a Potato now playable (sorry about the ads)$- Added Snow Rider 3D but currently being worked on",
+                        "2/23/2026$vBETA-1.0.1$- Throw a Potato put under maintenance due to a fatal error",
+                        "2/23/2026$vBETA-1.0.0$- CheddarOS public beta testing release."
+                    );
+                }
+
+        // ============================================================ \\
+                
             else if (userInput === "gamelist") {
                 const maxKeyLen = Math.max(...Object.keys(sites).map(k => k.length));
                 for (let key in sites) {
