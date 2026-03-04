@@ -2,64 +2,372 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title id="page-title"></title>
+    <title id="page-title">cheddar - Google Docs</title>
+    <link rel="icon" href="https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body, html {
-            margin: 0; padding: 0; height: 100%;
-            background-color: #0C0C0C;
-            color: #CCCCCC;
-            font-family: 'Consolas', 'Lucida Console', monospace;
-            overflow: hidden;
+            height: 100%; overflow: hidden;
+            font-family: 'Roboto', Arial, sans-serif;
+            background: #fff;
         }
+
+        .gdocs-header {
+            background: #fff;
+            padding: 6px 12px 0;
+            flex-shrink: 0;
+        }
+        .gdocs-header-top {
+            display: flex; align-items: center; gap: 6px; padding-bottom: 0;
+        }
+        .gdocs-logo {
+            width: 40px; height: 40px; flex-shrink: 0; margin-right: 4px; align-self: center;
+        }
+        /* Title + icons all on one line */
+        .gdocs-title-row {
+            display: flex; align-items: center; gap: 4px; flex: 1;
+        }
+        .gdocs-title {
+            font-family: 'Google Sans', sans-serif; font-size: 18px; font-weight: 400;
+            color: #202124; padding: 2px 4px; border-radius: 4px; white-space: nowrap;
+        }
+        .gdocs-meta-icon {
+            width: 28px; height: 28px; border-radius: 50%; border: none; background: transparent;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; color: #5f6368;
+        }
+        .gdocs-meta-icon .material-icons { font-size: 16px; }
+        .gdocs-saving { font-size: 12px; color: #5f6368; display: flex; align-items: center; gap: 4px; margin-left: 2px; }
+        .gdocs-saving .material-icons { font-size: 14px; }
+        .gdocs-header-right { margin-left: auto; display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+        .gdocs-hbtn {
+            width: 36px; height: 36px; border-radius: 50%; border: none; background: transparent;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; color: #5f6368;
+        }
+        .gdocs-hbtn .material-icons { font-size: 20px; }
+        .gdocs-meet-btn {
+            height: 32px; padding: 0 8px; border: 1px solid #dadce0; border-radius: 20px;
+            background: transparent; cursor: pointer; display: flex; align-items: center; gap: 2px;
+        }
+        .gdocs-meet-btn:hover { background: #f1f3f4; }
+        .gdocs-share-blue {
+            height: 32px; padding: 0 16px; background: #1a73e8; border: none; border-radius: 20px 0 0 20px;
+            cursor: pointer; display: flex; align-items: center; gap: 6px;
+            font-family: 'Google Sans', sans-serif; font-size: 14px; font-weight: 500; color: #fff;
+        }
+        .gdocs-share-blue:hover { background: #1557b0; }
+        .gdocs-share-blue .material-icons { font-size: 15px; }
+        .gdocs-share-arrow-blue {
+            height: 32px; width: 28px; background: #1a73e8; border: none; border-radius: 0 20px 20px 0;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff;
+            border-left: 1px solid #4a90d9;
+        }
+        .gdocs-share-arrow-blue:hover { background: #1557b0; }
+        .gdocs-avatar {
+            width: 36px; height: 36px; border-radius: 50%; background: #e8710a;
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 600; cursor: pointer; margin-left: 4px;
+            font-family: 'Google Sans', sans-serif; letter-spacing: -0.5px;
+        }
+        .gdocs-menubar { display: flex; align-items: center; padding: 2px 4px 0 44px; }
+        .gdocs-menu {
+            padding: 4px 9px; border-radius: 4px; cursor: pointer;
+            color: #202124; font-size: 13px; user-select: none;
+        }
+        .gdocs-menu:hover { background: #e8eaed; }
+
+        .gdocs-toolbar {
+            background: #f0f4f9; border-top: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;
+            padding: 3px 8px; display: flex; align-items: center; gap: 1px; flex-shrink: 0;
+        }
+        .tb { height: 28px; min-width: 28px; border: none; background: transparent; border-radius: 4px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            color: #444746; font-size: 13px; padding: 0 5px; }
+        .tb:hover { background: #d3d8de; }
+        .tb .material-icons { font-size: 18px; }
+        .tb-sep { width: 1px; height: 20px; background: #bdc1c6; margin: 0 3px; }
+        .tb-text { font-size: 13px; padding: 0 8px; height: 28px; border: none; background: transparent;
+            border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 4px; color: #202124; }
+        .tb-text:hover { background: #d3d8de; }
+        .tb-text .material-icons { font-size: 16px; color: #5f6368; }
+        .tb-sel-wrap { position: relative; display: flex; align-items: center; }
+        .tb-sel {
+            height: 28px; padding: 0 18px 0 8px; border: none; background: transparent;
+            font-size: 13px; color: #202124; cursor: pointer; outline: none; appearance: none; border-radius: 4px;
+        }
+        .tb-sel:hover { background: #d3d8de; }
+        .tb-sel-wrap::after { content: '▾'; position: absolute; right: 5px; font-size: 10px; color: #5f6368; pointer-events: none; }
+        .tb-editing {
+            display: flex; align-items: center; gap: 3px; height: 28px; padding: 0 8px;
+            border: none; background: transparent; border-radius: 4px; cursor: pointer;
+            font-size: 13px; color: #202124; margin-left: auto;
+        }
+        .tb-editing:hover { background: #d3d8de; }
+        .tb-editing .material-icons { font-size: 16px; }
+
+        .gdocs-ruler-row { display: flex; background: #f0f4f9; flex-shrink: 0; height: 22px; border-bottom: 1px solid #c7c7c7; }
+        .gdocs-ruler-spacer { width: 221px; flex-shrink: 0; background: #fff; border-right: 1px solid #e0e0e0; }
+        .gdocs-ruler-track { flex: 1; position: relative; overflow: hidden; }
+        .gdocs-ruler-page {
+            position: absolute; left: 50%; transform: translateX(-50%); width: 816px; height: 100%;
+            background: white; border-left: 1px solid #bdc1c6; border-right: 1px solid #bdc1c6;
+        }
+        .ruler-tri-l, .ruler-tri-r {
+            position: absolute; top: 2px; width: 0; height: 0;
+            border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 8px solid #4a86e8; cursor: ew-resize;
+        }
+        .ruler-tri-l { left: 88px; }
+        .ruler-tri-r { right: 88px; }
+
+        .gdocs-body { display: flex; flex: 1; overflow: hidden; }
+
+        .gdocs-sidebar {
+            width: 221px; flex-shrink: 0; background: #fff;
+            border-right: 1px solid #e0e0e0; display: flex; flex-direction: column; overflow: hidden;
+        }
+        .sb-hdr { display: flex; align-items: center; padding: 10px 10px 6px; }
+        .sb-back {
+            width: 32px; height: 32px; border-radius: 50%; border: none; background: transparent;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; color: #202124;
+        }
+        .sb-back .material-icons { font-size: 20px; }
+        .sb-title { font-size: 13px; font-weight: 500; flex: 1; margin-left: 6px; color: #202124; }
+        .sb-add {
+            width: 28px; height: 28px; border-radius: 50%; border: none; background: transparent;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; color: #5f6368; font-size: 20px;
+        }
+        .sb-tab {
+            margin: 0 8px 4px; padding: 7px 10px; border-radius: 8px;
+            background: #d3e3fd; display: flex; align-items: center; gap: 8px; cursor: pointer;
+        }
+        .sb-tab .material-icons { font-size: 16px; color: #1a73e8; }
+        .sb-tab-name { font-size: 13px; color: #202124; flex: 1; }
+        .sb-tab-more {
+            width: 24px; height: 24px; border-radius: 50%; border: none; background: transparent;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; color: #5f6368;
+        }
+        .sb-tab-more .material-icons { font-size: 16px; }
+        .sb-hint { padding: 8px 12px; font-size: 12px; color: #5f6368; line-height: 1.4; }
+
+        .gdocs-scroll {
+            flex: 1; background: #f0f4f9;
+            overflow-y: auto; overflow-x: auto; padding: 20px 0 80px;
+        }
+        .gdocs-scroll::-webkit-scrollbar { width: 8px; }
+        .gdocs-scroll::-webkit-scrollbar-track { background: #f0f4f9; }
+        .gdocs-scroll::-webkit-scrollbar-thumb { background: #bdc1c6; border-radius: 4px; }
+
+        .gdocs-page {
+            width: 816px; min-height: 1056px; background: white; margin: 0 auto;
+            box-shadow: 0 1px 4px rgba(0,0,0,.18), 0 0 0 1px rgba(0,0,0,.04);
+            padding: 96px;
+            font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.5; color: #202124;
+        }
+
         #terminal-ui {
-            padding: 12px; display: flex; flex-direction: column;
-            height: 100vh; width: 100vw; box-sizing: border-box;
-            overflow-y: auto; position: relative;
+            display: block;
         }
-        .log-line { margin-bottom: 2px; white-space: pre-wrap; line-height: 1.2; font-size: 15px; }
-        .cmd-output-block { margin-bottom: 15px; }
-        .input-wrapper { position: relative; display: flex; flex-grow: 1; align-items: center; }
-        .input-area { display: flex; align-items: center; margin-top: 2px; }
-        .prompt { margin-right: 4px; color: #CCCCCC; white-space: nowrap; }
+        .log-line {
+            margin-bottom: 2px; white-space: pre-wrap; line-height: 1.5;
+            font-size: 11pt; font-family: Arial, sans-serif; color: #202124;
+        }
+        .cmd-output-block { margin-bottom: 12px; }
+        .input-wrapper { position: relative; display: flex; flex-grow: 1; align-items: center; height: 1.5em; }
+        .input-area { display: flex; align-items: center; margin-top: 4px; }
+        .prompt { margin-right: 4px; color: #202124; white-space: nowrap; font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.5; }
         input {
-            background: transparent; border: none; color: #FFFFFF;
-            font-family: 'Consolas', monospace; font-size: 15px;
-            outline: none; width: 100%; padding: 0; z-index: 2;
+            background: transparent; border: none; color: #202124;
+            font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.5;
+            outline: none; width: 100%; padding: 0; margin: 0; z-index: 2;
+            caret-color: #000000; height: 1.5em; vertical-align: top;
         }
         #ghost-input {
-            position: absolute; top: 0; left: 0; color: #555555;
-            font-family: 'Consolas', monospace; font-size: 15px;
-            pointer-events: none; z-index: 1;
+            position: absolute; top: 0; left: 0; color: #9aa0a6;
+            font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.5;
+            pointer-events: none; z-index: 1; height: 1.5em;
+            white-space: pre; overflow: hidden;
         }
+
+        .log-line[style*="color:#FF5555"], .log-line[style*="color:#FFAA00"] {
+        }
+
+        .gdocs-status {
+            position: fixed; bottom: 0; left: 0; right: 0; background: #fff;
+            border-top: 1px solid #e0e0e0; padding: 4px 16px;
+            display: flex; align-items: center; gap: 12px;
+            font-size: 12px; color: #5f6368; z-index: 100;
+        }
+
+        .gdocs-shell { display: flex; flex-direction: column; height: 100vh; }
+
         @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+        ::selection { background: #c6d4f5; }
     </style>
 </head>
 <body onclick="document.getElementById('terminalInput').focus()">
-    <div id="terminal-ui">
-        <div class="log-line" id="version-line"></div>
-        <div class="log-line">Cheddar Corporation. All rights reserved.</div>
-        <br>
-        <div id="history">
-            <div class="log-line">Type "help" for a list of all possible commands.</div>
-        </div>
-        <div class="input-area">
-            <span class="prompt" id="prompt-text">C:\Users\cheddar-hobbs></span>
-            <div class="input-wrapper">
-                <input type="text" id="terminalInput" autofocus spellcheck="false" autocomplete="off">
-                <div id="ghost-input"></div>
-            </div>
-        </div>
+<div class="gdocs-shell">
+
+  <div class="gdocs-header">
+    <div class="gdocs-header-top">
+      <svg class="gdocs-logo" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="3" fill="#4285F4"/>
+        <path d="M11 8h12l8 8v18a2 2 0 01-2 2H11a2 2 0 01-2-2V10a2 2 0 012-2z" fill="white"/>
+        <path d="M23 8l8 8h-8z" fill="#BFDBFE"/>
+        <rect x="14" y="19" width="13" height="1.5" rx=".75" fill="#4285F4"/>
+        <rect x="14" y="22.5" width="13" height="1.5" rx=".75" fill="#4285F4"/>
+        <rect x="14" y="26" width="9" height="1.5" rx=".75" fill="#4285F4"/>
+      </svg>
+      <div class="gdocs-title-row">
+        <div class="gdocs-title" id="page-title-display">CheddarOS</div>
+        <button class="gdocs-meta-icon"><span class="material-icons">star_border</span></button>
+        <button class="gdocs-meta-icon"><span class="material-icons">drive_file_move_outline</span></button>
+        <button class="gdocs-meta-icon"><span class="material-icons">cloud_done</span></button>
+      </div>
+      <div class="gdocs-header-right">
+        <button class="gdocs-hbtn"><span class="material-icons">history</span></button>
+        <button class="gdocs-hbtn"><span class="material-icons">chat_bubble_outline</span></button>
+        <button class="gdocs-meet-btn">
+          <span class="material-icons" style="font-size:18px;color:#5f6368;">videocam</span>
+          <span class="material-icons" style="font-size:14px;color:#5f6368;">arrow_drop_down</span>
+        </button>
+        <button class="gdocs-share-blue">
+          <span class="material-icons" style="font-size:15px;">lock</span>Share
+        </button>
+        <button class="gdocs-share-arrow-blue"><span class="material-icons" style="font-size:16px;">arrow_drop_down</span></button>
+        <div class="gdocs-avatar">CH</div>
+      </div>
     </div>
+    <div class="gdocs-menubar">
+      <div class="gdocs-menu">File</div>
+      <div class="gdocs-menu">Edit</div>
+      <div class="gdocs-menu">View</div>
+      <div class="gdocs-menu">Insert</div>
+      <div class="gdocs-menu">Format</div>
+      <div class="gdocs-menu">Tools</div>
+      <div class="gdocs-menu">Extensions</div>
+      <div class="gdocs-menu">Help</div>
+    </div>
+  </div>
+
+  <div class="gdocs-toolbar">
+    <button class="tb-text"><span class="material-icons">search</span>Menus</button>
+    <div class="tb-sep"></div>
+    <button class="tb"><span class="material-icons">undo</span></button>
+    <button class="tb"><span class="material-icons">redo</span></button>
+    <button class="tb"><span class="material-icons">print</span></button>
+    <button class="tb"><span class="material-icons">spellcheck</span></button>
+    <button class="tb"><span class="material-icons">format_paint</span></button>
+    <div class="tb-sep"></div>
+    <div class="tb-sel-wrap"><select class="tb-sel" style="min-width:58px;">
+      <option>100%</option><option>75%</option><option>125%</option>
+    </select></div>
+    <div class="tb-sep"></div>
+    <div class="tb-sel-wrap"><select class="tb-sel" style="min-width:118px;">
+      <option>Normal text</option><option>Heading 1</option><option>Heading 2</option>
+    </select></div>
+    <div class="tb-sep"></div>
+    <div class="tb-sel-wrap"><select class="tb-sel" style="min-width:78px;">
+      <option>Arial</option><option>Times New Roman</option><option>Courier New</option>
+    </select></div>
+    <div class="tb-sep"></div>
+    <button class="tb" style="font-size:15px; min-width:22px;">−</button>
+    <div style="height:28px; min-width:36px; border:1px solid #bdc1c6; border-radius:3px; background:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; padding:0 4px;">11</div>
+    <button class="tb" style="font-size:15px; min-width:22px;">+</button>
+    <div class="tb-sep"></div>
+    <button class="tb"><strong style="font-size:14px;">B</strong></button>
+    <button class="tb"><em style="font-size:14px;">I</em></button>
+    <button class="tb"><u style="font-size:14px;">U</u></button>
+    <button class="tb" style="flex-direction:column;gap:1px;padding:2px 5px;">
+      <span style="font-weight:700;font-size:13px;line-height:1.2;">A</span>
+      <div style="height:3px;width:16px;background:#000000;border-radius:1px;"></div>
+    </button>
+    <button class="tb" style="flex-direction:column;gap:1px;padding:2px 5px;">
+      <span class="material-icons" style="font-size:15px;line-height:1.2;">format_color_fill</span>
+      <div style="height:3px;width:16px;background:#ffffff;border-radius:1px;"></div>
+    </button>
+    <div class="tb-sep"></div>
+    <button class="tb"><span class="material-icons">link</span></button>
+    <button class="tb"><span class="material-icons">add_comment</span></button>
+    <button class="tb"><span class="material-icons">image</span></button>
+    <div class="tb-sep"></div>
+    <button class="tb"><span class="material-icons">format_align_left</span></button>
+    <button class="tb"><span class="material-icons">format_line_spacing</span></button>
+    <button class="tb"><span class="material-icons">format_align_justify</span></button>
+    <div class="tb-sep"></div>
+    <button class="tb"><span class="material-icons">format_list_bulleted</span></button>
+    <button class="tb"><span class="material-icons">format_list_numbered</span></button>
+    <div class="tb-sep"></div>
+    <button class="tb"><span class="material-icons">format_indent_decrease</span></button>
+    <button class="tb"><span class="material-icons">format_indent_increase</span></button>
+    <div class="tb-sep"></div>
+    <button class="tb"><span class="material-icons">format_clear</span></button>
+    <button class="tb-editing">
+      <span class="material-icons" style="font-size:15px;">edit</span>Editing<span class="material-icons" style="font-size:14px;">arrow_drop_down</span>
+    </button>
+    <button class="tb" style="margin-left:2px;"><span class="material-icons">expand_less</span></button>
+  </div>
+
+  <div class="gdocs-ruler-row">
+    <div class="gdocs-ruler-spacer"></div>
+    <div class="gdocs-ruler-track">
+      <div class="gdocs-ruler-page">
+        <div class="ruler-tri-l"></div>
+        <div class="ruler-tri-r"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="gdocs-body">
+    <div class="gdocs-sidebar">
+      <div class="sb-hdr">
+        <button class="sb-back"><span class="material-icons">arrow_back</span></button>
+        <span class="sb-title">Document tabs</span>
+        <button class="sb-add">+</button>
+      </div>
+      <div class="sb-tab">
+        <span class="material-icons">article</span>
+        <span class="sb-tab-name">cheddar</span>
+        <button class="sb-tab-more"><span class="material-icons">more_vert</span></button>
+      </div>
+      <div class="sb-hint">Headings you add to the document will appear here.</div>
+    </div>
+
+    <div class="gdocs-scroll" id="gdocs-scroll">
+      <div class="gdocs-page">
+        <div id="terminal-ui">
+          <div id="history">
+            <div class="log-line">Type "help" for a list of all possible commands.</div>
+          </div>
+          <div class="input-area">
+            <span class="prompt" id="prompt-text">cheddar&gt;</span>
+            <div class="input-wrapper">
+              <input type="text" id="terminalInput" autofocus spellcheck="false" autocomplete="off">
+              <div id="ghost-input"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="gdocs-status">
+    <span id="word-count">0 words</span>
+    <span>|</span>
+    <span>CheddarOS Terminal</span>
+  </div>
+
+</div>
 
     <script>
         
         // ============================================================ \\
                             // CHEDDAROS VERSION \\
-                         const OS_VERSION = "vBETA-1.1.0";
+                         const OS_VERSION = "vBETA-2.0.0";
         // ============================================================ \\
 
-        document.getElementById("page-title").innerText = "CheddarOS " + OS_VERSION;
-        document.getElementById("version-line").innerText = "CheddarOS " + OS_VERSION;
+        document.getElementById("page-title").innerText = "cheddar - Google Docs";
 
         let currentState = "COMMAND_MODE";
         const sr3dCDN = "https://cdn.jsdelivr.net/gh/failedrifle/snowrider3D/";
@@ -104,7 +412,14 @@
         const inputField  = document.getElementById("terminalInput");
         const ghostField  = document.getElementById("ghost-input");
         const historyArea = document.getElementById("history");
-        const ui          = document.getElementById("terminal-ui");
+        const ui          = document.getElementById("gdocs-scroll");
+        document.getElementById("page-title-display").innerText = "CheddarOS " + OS_VERSION;
+
+        function smartScroll() {
+            const threshold = 120;
+            const nearBottom = ui.scrollHeight - ui.scrollTop - ui.clientHeight < threshold;
+            if (nearBottom) ui.scrollTop = ui.scrollHeight;
+        }
         const allSuggestions = [...Object.keys(commandDetails), ...Object.keys(sites)].sort();
 
         function changelog(...entries) {
@@ -138,7 +453,7 @@
                 isLaunching = false;
                 inputField.disabled = false;
                 inputField.focus();
-                ui.scrollTop = ui.scrollHeight;
+                smartScroll();
                 return;
             }
 
@@ -157,7 +472,7 @@
                 const progress = Math.min(elapsed / duration, 1);
                 const current  = Math.floor(progress * totalAssets);
                 loadLine.innerText = 'LOADING ASSETS: [' + current + '/' + totalAssets + ']';
-                ui.scrollTop = ui.scrollHeight;
+                smartScroll();
                 if (progress >= 1) break;
                 await new Promise(r => setTimeout(r, Math.random() > 0.9 ? 60 : 15));
             }
@@ -215,9 +530,8 @@ function handleInput() {
             cmdHistory.push(rawInput);
             historyIdx = -1;
             const userInput   = rawInput.toLowerCase();
-            const promptText  = document.getElementById("prompt-text");
 
-            historyArea.innerHTML += '<div class="log-line">' + promptText.innerText + ' ' + rawInput + '</div>';
+            historyArea.innerHTML += '<div class="log-line"><span style="color:#202124;">cheddar&gt;</span> ' + rawInput + '</div>';
             const outputBlock = document.createElement("div");
             outputBlock.className = "cmd-output-block";
             historyArea.appendChild(outputBlock);
@@ -243,6 +557,7 @@ function handleInput() {
             else if (userInput === "changelog") {
                 outputBlock.innerHTML += changelog(
                     "--- CHANGELOG ---",
+                    "3/4/2026$vBETA-2.0.0$ - Completely revamped the UI$- Changed tab name and icon",
                     "2/27/2026$vBETA-1.1.0$- Massive Code Cleanup",
                     "2/27/2026$vBETA-1.0.10$- Added Buckshot Roulette$- Buckshot Roulette offline while working on GoGuardian bypass",
                     "2/27/2026$vBETA-1.0.9$- Added Wrestle Bros$- Wrestle Bros offline while working on GoGuardian bypass",
@@ -263,7 +578,7 @@ function handleInput() {
                 for (let key in sites) {
                     const status = sites[key].enabled ? '' : ' [OFFLINE]';
                     const padded = key.padEnd(maxKeyLen + 4, '\u00A0');
-                    outputBlock.innerHTML += '<div class="log-line" style="color:' + (sites[key].enabled ? '#CCCCCC' : '#FF5555') + '"> > ' + padded + '(' + sites[key].name + ')' + status + '</div>';
+                    outputBlock.innerHTML += '<div class="log-line" style="color:' + (sites[key].enabled ? '#202124' : '#FF5555') + '"> > ' + padded + '(' + sites[key].name + ')' + status + '</div>';
                 }
             }
             else if (sites[userInput]) {
@@ -275,7 +590,7 @@ function handleInput() {
             }
 
             inputField.value = "";
-            ui.scrollTop = ui.scrollHeight;
+            smartScroll();
         }
     </script>
 </body>
