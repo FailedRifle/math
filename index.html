@@ -364,7 +364,7 @@
         
         // ============================================================ \\
                             // CHEDDAROS VERSION \\
-                         const OS_VERSION = "ALPHA-2.0.1a";
+                         const OS_VERSION = "ALPHA-2.0.1b";
         // ============================================================ \\
 
         document.getElementById("page-title").innerText = "cheddar - Google Docs";
@@ -542,12 +542,14 @@ function handleInput() {
 
                 keys.forEach(cmd => {
                     const currentLetter = cmd[0].toLowerCase();
-                    // Optional: Add a subtle indicator only if you want to see the letter change
-                    // otherwise, keep it as is for maximum tightness.
+                    if (lastLetter !== "" && currentLetter !== lastLetter) {
+                        outputBlock.innerHTML += '<div class="log-line" style="margin-bottom:0; line-height:1;">&nbsp;</div>';
+                    }
                     lastLetter = currentLetter;
 
-                    const padded = cmd.padEnd(12, '\u00A0');
-                    outputBlock.innerHTML += `<div class="log-line"> > ${padded}${commandDetails[cmd]}</div>`;
+                    // Reduced padding and forced tight line height
+                    const padded = cmd.padEnd(10, '\u00A0');
+                    outputBlock.innerHTML += `<div class="log-line" style="margin-bottom:0; line-height:1.2;"> > ${padded}${commandDetails[cmd]}</div>`;
                 });
             }
             else if (userInput === "clear") {
@@ -583,14 +585,23 @@ function handleInput() {
             }
             else if (userInput === "gamelist") {
                 const keys = Object.keys(sites).sort();
+                let lastLetter = "";
                 
                 keys.forEach(key => {
+                    const currentLetter = key[0].toLowerCase();
+                    if (lastLetter !== "" && currentLetter !== lastLetter) {
+                        // This creates a very small 1-line gap for the ABC break
+                        outputBlock.innerHTML += '<div class="log-line" style="margin-bottom:0; line-height:1;">&nbsp;</div>';
+                    }
+                    lastLetter = currentLetter;
+
                     const status = sites[key].enabled ? '' : ' [OFFLINE]';
                     const name = sites[key].name;
-                    // Reduced padding from 15 to 12 for a tighter horizontal fit
-                    const paddedKey = key.padEnd(12, '\u00A0');
+                    const color = sites[key].enabled ? '#202124' : '#FF5555';
                     
-                    outputBlock.innerHTML += `<div class="log-line" style="color:${sites[key].enabled ? '#202124' : '#FF5555'}"> > ${paddedKey} (${name})${status}</div>`;
+                    // Uses 10 spaces for padding and tightens vertical spacing
+                    const paddedKey = key.padEnd(10, '\u00A0');
+                    outputBlock.innerHTML += `<div class="log-line" style="color:${color}; margin-bottom:0; line-height:1.2;"> > ${paddedKey} (${name})${status}</div>`;
                 });
             }
             else if (sites[userInput]) {
