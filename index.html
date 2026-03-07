@@ -364,7 +364,7 @@
         
         // ============================================================ \\
                             // CHEDDAROS VERSION \\
-                         const OS_VERSION = "ALPHA-2.0.1g";
+                         const OS_VERSION = "ALPHA-2.0.1";
         // ============================================================ \\
 
         document.getElementById("page-title").innerText = "cheddar - Google Docs";
@@ -478,7 +478,7 @@
             const totalAssets = Math.floor(siteData.content.length / 2);
             const duration = Math.min((totalAssets / 300) * 1500, 4000);
 
-            outputBlock.innerHTML += '<div class="log-line">Scanning bitstream for ' + siteData.name + '...</div>';
+            outputBlock.innerHTML += '<div class="log-line">Searching for ' + siteData.name + '...</div>';
 
             const loadLine = document.createElement("div");
             loadLine.className = "log-line";
@@ -586,7 +586,7 @@
             else if (userInput === "changelog") {
                 outputBlock.innerHTML += changelog(
                     "--- CHANGELOG ---",
-                    "3/7/2026$vALPHA-2.0.1$- Formatted the games and the help list to look more professional$- Added an announcement text that will appear when you first load. (if there is an announcement)",
+                    "3/7/2026$vALPHA-2.0.1$- Formatted the games and the help list to look more professional$- Added an announcement text that will appear when you first load. (if there is an announcement)$- Minor bug fixes related towards the offline games and GoGouardian bypasses.",
                     "3/4/2026$vALPHA-2.0.0$ - Completely revamped the UI$- Changed tab name and icon",
                     "2/27/2026$vALPHA-1.1.0$- Massive Code Cleanup",
                     "2/27/2026$vALPHA-1.0.10$- Added Buckshot Roulette$- Buckshot Roulette offline while working on GoGuardian bypass",
