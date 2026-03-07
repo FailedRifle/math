@@ -364,7 +364,7 @@
         
         // ============================================================ \\
                             // CHEDDAROS VERSION \\
-                         const OS_VERSION = "ALPHA-2.0.1c";
+                         const OS_VERSION = "ALPHA-2.0.1d";
         // ============================================================ \\
 
         document.getElementById("page-title").innerText = "cheddar - Google Docs";
@@ -524,7 +524,7 @@
             }
         });
 
-function handleInput() {
+        function handleInput() {
             const rawInput = inputField.value.trim();
             if (rawInput === "") return;
             cmdHistory.push(rawInput);
@@ -547,9 +547,12 @@ function handleInput() {
                     }
                     lastLetter = currentLetter;
 
-                    // Uses 20 spaces of padding and Courier New to ensure perfect alignment
-                    const padded = cmd.padEnd(20, '\u00A0');
-                    outputBlock.innerHTML += `<div class="log-line" style="margin-bottom:0; line-height:1.2; font-family: 'Courier New', Courier, monospace;">${padded}${commandDetails[cmd]}</div>`;
+                    // Uses CSS Grid to create a 150px wide first column
+                    outputBlock.innerHTML += `
+                        <div class="log-line" style="display:grid; grid-template-columns: 150px 1fr; margin-bottom:0; line-height:1.2;">
+                            <span>${cmd}</span>
+                            <span>${commandDetails[cmd]}</span>
+                        </div>`;
                 });
             }
             else if (userInput === "clear") {
@@ -598,9 +601,12 @@ function handleInput() {
                     const name = sites[key].name;
                     const color = sites[key].enabled ? '#202124' : '#FF5555';
                     
-                    // Removed the ">" and used 20 spaces for the "neat" column look
-                    const paddedKey = key.padEnd(20, '\u00A0');
-                    outputBlock.innerHTML += `<div class="log-line" style="color:${color}; margin-bottom:0; line-height:1.2; font-family: 'Courier New', Courier, monospace;">${paddedKey}(${name})${status}</div>`;
+                    // Uses CSS Grid to keep names and parentheses aligned neatly
+                    outputBlock.innerHTML += `
+                        <div class="log-line" style="display:grid; grid-template-columns: 150px 1fr; color:${color}; margin-bottom:0; line-height:1.2;">
+                            <span>${key}</span>
+                            <span>(${name})${status}</span>
+                        </div>`;
                 });
             }
             else if (sites[userInput]) {
