@@ -364,7 +364,7 @@
         
         // ============================================================ \\
                             // CHEDDAROS VERSION \\
-                         const OS_VERSION = "ALPHA-2.0.1d";
+                         const OS_VERSION = "ALPHA-2.0.1e";
         // ============================================================ \\
 
         document.getElementById("page-title").innerText = "cheddar - Google Docs";
@@ -587,26 +587,44 @@
                 );
             }
             else if (userInput === "gamelist") {
+                // Get all keys and sort them alphabetically first
                 const keys = Object.keys(sites).sort();
-                let lastLetter = "";
                 
+                // Group keys by their first letter
+                const groups = {};
                 keys.forEach(key => {
-                    const currentLetter = key[0].toLowerCase();
-                    if (lastLetter !== "" && currentLetter !== lastLetter) {
+                    const firstChar = key[0].toLowerCase();
+                    if (!groups[firstChar]) groups[firstChar] = [];
+                    groups[firstChar].push(key);
+                });
+
+                // Get sorted letters (a, b, c...)
+                const sortedLetters = Object.keys(groups).sort();
+                
+                sortedLetters.forEach((letter, index) => {
+                    // Add the small spacer between letter groups
+                    if (index > 0) {
                         outputBlock.innerHTML += '<div class="log-line" style="margin-bottom:0; line-height:1;">&nbsp;</div>';
                     }
-                    lastLetter = currentLetter;
 
-                    const status = sites[key].enabled ? '' : ' [OFFLINE]';
-                    const name = sites[key].name;
-                    const color = sites[key].enabled ? '#202124' : '#FF5555';
-                    
-                    // Uses CSS Grid to keep names and parentheses aligned neatly
-                    outputBlock.innerHTML += `
-                        <div class="log-line" style="display:grid; grid-template-columns: 150px 1fr; color:${color}; margin-bottom:0; line-height:1.2;">
-                            <span>${key}</span>
-                            <span>(${name})${status}</span>
-                        </div>`;
+                    // Sort the games within this specific letter group: 
+                    // Enabled games first, then by name; Offline games last.
+                    const subgroup = groups[letter].sort((a, b) => {
+                        if (sites[a].enabled === sites[b].enabled) return a.localeCompare(b);
+                        return sites[a].enabled ? -1 : 1;
+                    });
+
+                    subgroup.forEach(key => {
+                        const status = sites[key].enabled ? '' : ' [OFFLINE]';
+                        const name = sites[key].name;
+                        const color = sites[key].enabled ? '#202124' : '#FF5555';
+                        
+                        outputBlock.innerHTML += `
+                            <div class="log-line" style="display:grid; grid-template-columns: 150px 1fr; color:${color}; margin-bottom:0; line-height:1.2;">
+                                <span>${key}</span>
+                                <span>(${name})${status}</span>
+                            </div>`;
+                    });
                 });
             }
             else if (sites[userInput]) {
