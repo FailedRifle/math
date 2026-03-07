@@ -603,11 +603,23 @@
             }
             else if (userInput === "info") {
                 outputBlock.innerHTML += `
-                    <div class="log-line" style="color: #ffc567; font-weight: bold;">CheddarOS</div>
-                    <div class="log-line">SYSTEM-VERSION: ${OS_VERSION}</div>
-                    <div class="log-line">VERSION: ${githubCommitCount}</div>
-                    <div class="log-line">LAST UPDATED:  ${githubLastUpdate}</div>
-                    <div class="log-line">BLOCKED BY GOGUARDIAN: 1</div>
+                    <div class="log-line" style="color: #ffc567; font-weight: bold; margin-bottom: 4px;">CheddarOS</div>
+                    <div class="log-line" style="display:grid; grid-template-columns: 150px 1fr; line-height:1.2;">
+                        <span>System-Version</span>
+                        <span>${OS_VERSION}</span>
+                    </div>
+                    <div class="log-line" style="display:grid; grid-template-columns: 150px 1fr; line-height:1.2;">
+                        <span>Version</span>
+                        <span>${githubCommitCount}</span>
+                    </div>
+                    <div class="log-line" style="display:grid; grid-template-columns: 150px 1fr; line-height:1.2;">
+                        <span>Last Updated</span>
+                        <span>${githubLastUpdate}</span>
+                    </div>
+                    <div class="log-line" style="display:grid; grid-template-columns: 150px 1fr; line-height:1.2;">
+                        <span>Blocked Counter</span>
+                        <span>1</span>
+                    </div>
                 `;
             }
             else if (userInput === "credits") {
