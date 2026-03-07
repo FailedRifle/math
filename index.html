@@ -375,7 +375,7 @@
         let cmdHistory = [];
         let historyIdx = -1;
 
-        const ANNOUNCEMENT_TEXT = "";
+        const ANNOUNCEMENT_TEXT = "Please keep CheddarOS PRIVATE.";
 
         function displayAnnouncement() {
             const area = document.getElementById("announcement-area");
@@ -565,7 +565,6 @@
                     }
                     lastLetter = currentLetter;
 
-                    // Uses CSS Grid to create a 150px wide first column
                     outputBlock.innerHTML += `
                         <div class="log-line" style="display:grid; grid-template-columns: 150px 1fr; margin-bottom:0; line-height:1.2;">
                             <span>${cmd}</span>
@@ -605,10 +604,8 @@
                 );
             }
             else if (userInput === "gamelist") {
-                // Get all keys and sort them alphabetically first
                 const keys = Object.keys(sites).sort();
                 
-                // Group keys by their first letter
                 const groups = {};
                 keys.forEach(key => {
                     const firstChar = key[0].toLowerCase();
@@ -616,17 +613,13 @@
                     groups[firstChar].push(key);
                 });
 
-                // Get sorted letters (a, b, c...)
                 const sortedLetters = Object.keys(groups).sort();
                 
                 sortedLetters.forEach((letter, index) => {
-                    // Add the small spacer between letter groups
                     if (index > 0) {
                         outputBlock.innerHTML += '<div class="log-line" style="margin-bottom:0; line-height:1;">&nbsp;</div>';
                     }
 
-                    // Sort the games within this specific letter group: 
-                    // Enabled games first, then by name; Offline games last.
                     const subgroup = groups[letter].sort((a, b) => {
                         if (sites[a].enabled === sites[b].enabled) return a.localeCompare(b);
                         return sites[a].enabled ? -1 : 1;
