@@ -537,11 +537,20 @@ function handleInput() {
             historyArea.appendChild(outputBlock);
 
             if (userInput === "help") {
-                const maxCmdLen = Math.max(...Object.keys(commandDetails).map(k => k.length));
-                for (let cmd in commandDetails) {
-                    const padded = cmd.padEnd(maxCmdLen + 4, '\u00A0');
-                    outputBlock.innerHTML += '<div class="log-line"> > ' + padded + commandDetails[cmd] + '</div>';
-                }
+                const keys = Object.keys(commandDetails).sort();
+                let lastLetter = "";
+
+                keys.forEach(cmd => {
+                    const currentLetter = cmd[0].toLowerCase();
+
+                    if (lastLetter !== "" && currentLetter !== lastLetter) {
+                        outputBlock.innerHTML += '<div class="log-line"> </div>';
+                    }
+                    lastLetter = currentLetter;
+
+                    const padded = cmd.padEnd(15, '\u00A0');
+                    outputBlock.innerHTML += `<div class="log-line"> > ${padded}${commandDetails[cmd]}</div>`;
+                });
             }
             else if (userInput === "clear") {
                 historyArea.innerHTML = "";
@@ -574,12 +583,21 @@ function handleInput() {
                 );
             }
             else if (userInput === "gamelist") {
-                const maxKeyLen = Math.max(...Object.keys(sites).map(k => k.length));
-                for (let key in sites) {
+                const keys = Object.keys(sites).sort();
+                let lastLetter = "";
+
+                keys.forEach(key => {
+                    const currentLetter = key[0].toLowerCase();
+                    
+                    if (lastLetter !== "" && currentLetter !== lastLetter) {
+                        outputBlock.innerHTML += '<div class="log-line"> </div>';
+                    }
+                    lastLetter = currentLetter;
+
                     const status = sites[key].enabled ? '' : ' [OFFLINE]';
-                    const padded = key.padEnd(maxKeyLen + 4, '\u00A0');
-                    outputBlock.innerHTML += '<div class="log-line" style="color:' + (sites[key].enabled ? '#202124' : '#FF5555') + '"> > ' + padded + '(' + sites[key].name + ')' + status + '</div>';
-                }
+                    const name = sites[key].name;
+                    outputBlock.innerHTML += `<div class="log-line" style="color:${sites[key].enabled ? '#202124' : '#FF5555'}"> > ${key.padEnd(15, '\u00A0')} (${name})${status}</div>`;
+                });
             }
             else if (sites[userInput]) {
                 outputBlock.remove();
