@@ -375,19 +375,19 @@
         let cmdHistory = [];
         let historyIdx = -1;
 
-        const ANNOUNCEMENT_TEXT = "SYSTEM ADVISORY: Server maintenance scheduled for midnight tonight."; 
-        const SHOW_ANNOUNCEMENT = true;
+const ANNOUNCEMENT_TEXT = "hi hi hi"; // Your bold red text
+const SHOW_ANNOUNCEMENT = true;
 
-        function displayAnnouncement() {
-            const area = document.getElementById("announcement-area");
-            if (SHOW_ANNOUNCEMENT && ANNOUNCEMENT_TEXT) {
-                area.innerHTML = `
-                    <div class="log-line" style="color: #FF0000; font-weight: bold; margin-top: 5px;">
-                         ${ANNOUNCEMENT_TEXT}
-                    </div>
-                    <div class="log-line">&nbsp;</div>`;
-            }
-        }
+function displayAnnouncement() {
+    const area = document.getElementById("announcement-area");
+    if (SHOW_ANNOUNCEMENT && ANNOUNCEMENT_TEXT) {
+        area.innerHTML = `
+            <div class="log-line" style="color: #FF0000; font-weight: bold; margin-bottom: 0;">
+                ${ANNOUNCEMENT_TEXT}
+            </div>
+            <div class="log-line" style="line-height: 1.2;">&nbsp;</div>`;
+    }
+}
 
 displayAnnouncement();
 
