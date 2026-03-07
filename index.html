@@ -375,17 +375,15 @@
         let cmdHistory = [];
         let historyIdx = -1;
 
-// --- ANNOUNCEMENT SYSTEM ---
-        const ANNOUNCEMENT_TEXT = "test"; 
+        const ANNOUNCEMENT_TEXT = "";
 
         function displayAnnouncement() {
             const area = document.getElementById("announcement-area");
             if (!area) return;
             
             if (ANNOUNCEMENT_TEXT.trim() !== "") {
-                // Using a template that forces the alignment and the gap
                 area.innerHTML = `
-                    <div class="log-line" style="color: #FF0000; font-weight: bold; margin-top: 2px; margin-bottom: 0;">${ANNOUNCEMENT_TEXT}</div>
+                    <div class="log-line" style="color: #FF0000; font-weight: bold; margin-top: 2px;">${ANNOUNCEMENT_TEXT}</div>
                     <div class="log-line" style="line-height: 0.8;">&nbsp;</div>
                 `;
             } else {
