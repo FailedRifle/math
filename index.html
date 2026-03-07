@@ -364,7 +364,7 @@
         
         // ============================================================ \\
                             // CHEDDAROS VERSION \\
-                         const OS_VERSION = "ALPHA-2.0.1b";
+                         const OS_VERSION = "ALPHA-2.0.1c";
         // ============================================================ \\
 
         document.getElementById("page-title").innerText = "cheddar - Google Docs";
@@ -547,9 +547,9 @@ function handleInput() {
                     }
                     lastLetter = currentLetter;
 
-                    // Reduced padding and forced tight line height
-                    const padded = cmd.padEnd(10, '\u00A0');
-                    outputBlock.innerHTML += `<div class="log-line" style="margin-bottom:0; line-height:1.2;"> > ${padded}${commandDetails[cmd]}</div>`;
+                    // Uses 20 spaces of padding and Courier New to ensure perfect alignment
+                    const padded = cmd.padEnd(20, '\u00A0');
+                    outputBlock.innerHTML += `<div class="log-line" style="margin-bottom:0; line-height:1.2; font-family: 'Courier New', Courier, monospace;">${padded}${commandDetails[cmd]}</div>`;
                 });
             }
             else if (userInput === "clear") {
@@ -590,7 +590,6 @@ function handleInput() {
                 keys.forEach(key => {
                     const currentLetter = key[0].toLowerCase();
                     if (lastLetter !== "" && currentLetter !== lastLetter) {
-                        // This creates a very small 1-line gap for the ABC break
                         outputBlock.innerHTML += '<div class="log-line" style="margin-bottom:0; line-height:1;">&nbsp;</div>';
                     }
                     lastLetter = currentLetter;
@@ -599,9 +598,9 @@ function handleInput() {
                     const name = sites[key].name;
                     const color = sites[key].enabled ? '#202124' : '#FF5555';
                     
-                    // Uses 10 spaces for padding and tightens vertical spacing
-                    const paddedKey = key.padEnd(10, '\u00A0');
-                    outputBlock.innerHTML += `<div class="log-line" style="color:${color}; margin-bottom:0; line-height:1.2;"> > ${paddedKey} (${name})${status}</div>`;
+                    // Removed the ">" and used 20 spaces for the "neat" column look
+                    const paddedKey = key.padEnd(20, '\u00A0');
+                    outputBlock.innerHTML += `<div class="log-line" style="color:${color}; margin-bottom:0; line-height:1.2; font-family: 'Courier New', Courier, monospace;">${paddedKey}(${name})${status}</div>`;
                 });
             }
             else if (sites[userInput]) {
