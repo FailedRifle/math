@@ -425,6 +425,7 @@
             "credits":   "View the authors and contributors.",
             "gamelist":  "List all available games.",
             "help":      "Display this help menu."
+            "info":      "View repository and build information."
         };
 
         const inputField  = document.getElementById("terminalInput");
@@ -575,6 +576,15 @@
             else if (userInput === "clear") {
                 historyArea.innerHTML = "";
                 outputBlock.remove();
+            }
+            else if (userInput === "info") {
+                outputBlock.innerHTML += `
+                    <div class="log-line" style="color: #1a73e8; font-weight: bold;">CHEDDAROS</div>
+                    <div class="log-line">Build Version: ${OS_VERSION}</div>
+                    <div class="log-line">Version: ${githubCommitCount}</div>
+                    <div class="log-line">Last Updated:  ${githubLastUpdate}</div>
+                    <div class="log-line">Blocked by GoGuardian: 1</div>
+                `;
             }
             else if (userInput === "credits") {
                 outputBlock.innerHTML += changelog(
