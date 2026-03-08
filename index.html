@@ -364,7 +364,7 @@
         
         // ============================================================ \\
                             // CHEDDAROS VERSION \\
-                         const OS_VERSION = "ALPHA-2.0.2";
+                         const OS_VERSION = "ALPHA-2.0.3";
         // ============================================================ \\
 
         document.getElementById("page-title").innerText = "cheddar - Google Docs";
@@ -427,7 +427,8 @@
         const rbHTML = `<!DOCTYPE html><html lang="en"><head><base href="https://cdn.jsdelivr.net/gh/genizy/assets@main/retro-bowl/"><meta charset="utf-8"><title>retro bowl</title><style>body,html{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#000;}canvas{width:100%;height:100%;image-rendering:pixelated;}</style></head><body><div class="gm4html5_div_class" id="gm4html5_div_id"><canvas id="canvas" width="960" height="540"></canvas></div><script src="html5game/RetroBowl.js"><\/script><script>function start(){if(typeof GameMaker_Init==="function"){GameMaker_Init();}else{setTimeout(start,50);}}start();<\/script></body></html>`;        
         const ssHTML = ``;
         const wbHTML = ``;
-        const brHTML = ``;
+        const brHTML = `<!DOCTYPE html><html lang="en"><head><base href="https://cdn.jsdelivr.net/gh/FailedRifle/buckshot-roulette@main/"><meta charset="utf-8"><meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0"><title>buckshot roulette</title><link rel="stylesheet" href="style.css"><link id="-gd-engine-icon" rel="icon" type="image/png" href="buckshot-roulette.icon.png"/><link rel="apple-touch-icon" href="buckshot-roulette.apple-touch-icon.png"/></head><body><script src="main.js"><\/script><div id="loading-text" style="color:white;font-family:cursive;font-size:48px;text-align:center;margin-top:20px;">LOADING...</div><canvas id="canvas">Your browser does not support the canvas tag.</canvas><noscript>Your browser does not support JavaScript.</noscript><div id="status"><img id="status-splash" class="show-image--true fullsize--true use-filter--true" src="buckshot-roulette.png" alt=""><progress id="status-progress"></progress><div id="status-notice"></div></div><script src="buckshot-roulette.js"><\/script><script>const GODOT_CONFIG={"args":[],"canvasResizePolicy":2,"ensureCrossOriginIsolationHeaders":false,"executable":"buckshot-roulette","experimentalVK":false,"fileSizes":{"buckshot-roulette.pck":344705792,"buckshot-roulette.wasm":43444261},"focusCanvas":false,"gdextensionLibs":[]};const GODOT_THREADS_ENABLED=false;const engine=new Engine(GODOT_CONFIG);function run(){const loadingText=document.getElementById('loading-text');const statusOverlay=document.getElementById('status');const statusProgress=document.getElementById('status-progress');const statusNotice=document.getElementById('status-notice');loadingText.remove();let initializing=true;let statusMode='';function setStatusMode(mode){if(statusMode===mode||!initializing)return;if(mode==='hidden'){statusOverlay.remove();initializing=false;return;}statusOverlay.style.visibility='visible';statusProgress.style.display=mode==='progress'?'block':'none';statusNotice.style.display=mode==='notice'?'block':'none';statusMode=mode;}function setStatusNotice(text){while(statusNotice.lastChild){statusNotice.removeChild(statusNotice.lastChild);}const lines=text.split('\n');lines.forEach((line)=>{statusNotice.appendChild(document.createTextNode(line));statusNotice.appendChild(document.createElement('br'));});}function displayFailureNotice(err){console.error(err);if(err instanceof Error){setStatusNotice(err.message);}else if(typeof err==='string'){setStatusNotice(err);}else{setStatusNotice('An unknown error occurred.');}setStatusMode('notice');initializing=false;}const missing=Engine.getMissingFeatures({threads:GODOT_THREADS_ENABLED});if(missing.length!==0){const missingMsg='Error\nThe following features required to run Godot projects on the Web are missing:\n';displayFailureNotice(missingMsg+missing.join('\n'));}else{setStatusMode('progress');engine.startGame({onProgress:function(current,total){if(current>0&&total>0){statusProgress.value=current;statusProgress.max=total;}else{statusProgress.removeAttribute('value');statusProgress.removeAttribute('max');}}}).then(()=>{setStatusMode('hidden');},displayFailureNotice);}}window.godotRunStart=run;<\/script></body></html>`;
+        const dhHTML = `<!DOCTYPE html><html lang="en-us"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><style>body{margin:0;padding:0}.webgl-content *{border:0;margin:0;padding:0}.webgl-content{position:absolute}.webgl-content,#gameContainer,#unityContainer,canvas{width:100%!important;height:100%!important}</style></head><body style="margin:0 auto;overflow:hidden"><div class="webgl-content"><div id="gameContainer" style="width:100%;height:100%;background:#111"></div></div><script src="https://rawcdn.githack.com/unxa/unxa.github.io/976db99398423b4e5a8b327892c2b57b6a5b766f/g/drift-hunters/UnityLoader2019.js"><\/script><script>var gameInstance=UnityLoader.instantiate("gameContainer","https://rawcdn.githack.com/unxa/unxa.github.io/976db99398423b4e5a8b327892c2b57b6a5b766f/g/drift-hunters/dh.json");<\/script></body></html>`;        
         
         const sites = {
             "fnae": { name: "Five Nights at Epstein's", enabled: true,  content: fnaeHTML},
@@ -439,8 +440,9 @@
             "snowrider": { name: "Snow Rider 3D", enabled: true,  content: sr3dHTML},
             "retrobowl": { name: "Retro Bowl", enabled: true,  content: rbHTML},
             "shellshockers": { name: "Shell Shockers", enabled: false,  content: ssHTML},
-            "wresltebros": { name: "Wrestle Bros", enabled: false,  content: wbHTML},
-            "buckshot": { name: "Buckshot Roulette", enabled: false,  content: brHTML},
+            "wrestlebros": { name: "Wrestle Bros", enabled: false,  content: wbHTML},
+            "buckshot": { name: "Buckshot Roulette", enabled: true,  content: brHTML},
+            "drifthunter": { name: "Drift Hunters", enabled: true,  content: dhHTML},
         };
 
         const commandDetails = {
@@ -632,6 +634,7 @@
             else if (userInput === "changelog") {
                 outputBlock.innerHTML += changelog(
                     "--- CHANGELOG ---",
+                    "3/8/2026$vALPHA-2.0.3$- Added Drift Hunters$- Fixed GoGuardian bypass for Buckshot Roulette",
                     "3/7/2026$vALPHA-2.0.2$- Added a info command to see more information about CheddarOS",
                     "3/7/2026$vALPHA-2.0.1$- Formatted the games and the help list to look more professional$- Added an announcement text that will appear when you first load. (if there is an announcement)$- Minor bug fixes related towards the offline games and GoGouardian bypasses.",
                     "3/4/2026$vALPHA-2.0.0$ - Completely revamped the UI$- Changed tab name and icon",
