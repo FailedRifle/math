@@ -423,7 +423,6 @@
         const sr3dHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/snow-rider-3d.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
         const tapHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/throw-a-potato.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
         const rbHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/retro-bowl.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;        
-        const ssHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/shell-shockers.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
         const wbHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/wrestle-bros.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
         const brHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/buckshot-roulette.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
         const dhHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/drift-hunters.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
@@ -437,7 +436,6 @@
             "potato": { name: "Throw a Potato", enabled: true,  content: tapHTML },
             "snowrider": { name: "Snow Rider 3D", enabled: true,  content: sr3dHTML},
             "retrobowl": { name: "Retro Bowl", enabled: true,  content: rbHTML},
-            "shellshockers": { name: "Shell Shockers", enabled: true,  content: ssHTML},
             "wrestlebros": { name: "Wrestle Bros", enabled: false,  content: wbHTML},
             "buckshot": { name: "Buckshot Roulette", enabled: true,  content: brHTML},
             "drifthunters": { name: "Drift Hunters", enabled: true,  content: dhHTML},
@@ -632,7 +630,7 @@
             else if (userInput === "changelog") {
                 outputBlock.innerHTML += changelog(
                     "--- CHANGELOG ---",
-                    "3/9/2026$vALPHA-2.1.0$- Completely changed how games load$- Games load faster than ever$- Reduced lag in every game and inside CheddarOS$- Fixed GoGuardian bypass for Buckshot Roulette",
+                    "3/9/2026$vALPHA-2.1.0$- Completely changed how games load$- Games load faster than ever$- Reduced lag in every game and inside CheddarOS$- Fixed GoGuardian bypass for Buckshot Roulette$- Shell Shockers removed",
                     "3/8/2026$vALPHA-2.0.3$- Added Drift Hunters",
                     "3/7/2026$vALPHA-2.0.2$- Added a info command to see more information about CheddarOS",
                     "3/7/2026$vALPHA-2.0.1$- Formatted the games and the help list to look more professional$- Added an announcement text that will appear when you first load. (if there is an announcement)$- Minor bug fixes related towards the offline games and GoGouardian bypasses.",
