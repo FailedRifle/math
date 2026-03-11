@@ -363,7 +363,7 @@
         
         // ============================================================ \\
                             // CHEDDAROS VERSION \\
-                         const OS_VERSION = "ALPHA-2.1.1a";
+                         const OS_VERSION = "ALPHA-2.1.1";
         // ============================================================ \\
 
         document.getElementById("page-title").innerText = "cheddar - Google Docs";
@@ -426,7 +426,7 @@
         const wbHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/wrestle-bros.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
         const brHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/buckshot-roulette.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
         const dhHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/drift-hunters.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
-        const blHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/basketball-legends-2020.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+        const blHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/basketball-legends.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
 
         
         const sites = {
@@ -441,8 +441,7 @@
             "wrestlebros": { name: "Wrestle Bros", enabled: false,  content: wbHTML},
             "buckshot": { name: "Buckshot Roulette", enabled: true,  content: brHTML},
             "drifthunters": { name: "Drift Hunters", enabled: true,  content: dhHTML},
-            "basketball": { name: "Basketball Legends 2020", enabled: true,  content: blHTML},
-
+            "basketball": { name: "Basketball Legends 2020", enabled: false,  content: blHTML},
         };
 
         const commandDetails = {
