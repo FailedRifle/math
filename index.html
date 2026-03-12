@@ -587,7 +587,7 @@
                 keys.forEach(cmd => {
                     const currentLetter = cmd[0].toLowerCase();
                     if (lastLetter !== "" && currentLetter !== lastLetter) {
-                        outputBlock.innerHTML += '<div class="log-line" style="margin-bottom:0; line-height:1;">&nbsp;</div>';
+                        outputBlock.innerHTML += '<div class="log-line" style="margin-bottom:0; line-height:0.5;">&nbsp;</div>';
                     }
                     lastLetter = currentLetter;
 
