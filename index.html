@@ -363,7 +363,7 @@
         
         // ============================================================ \\
                             // CHEDDAROS VERSION \\
-                         const OS_VERSION = "ALPHA-2.1.1";
+                         const OS_VERSION = "ALPHA-2.1.1a";
         // ============================================================ \\
 
         document.getElementById("page-title").innerText = "cheddar - Google Docs";
@@ -668,7 +668,7 @@
                 
                 sortedLetters.forEach((letter, index) => {
                     if (index > 0) {
-                        outputBlock.innerHTML += '<div class="log-line" style="margin-bottom:0; line-height:1;">&nbsp;</div>';
+                        outputBlock.innerHTML += '<div class="log-line" style="margin-bottom:0; line-height:0.5;">&nbsp;</div>';
                     }
 
                     const subgroup = groups[letter].sort((a, b) => {
