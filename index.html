@@ -427,7 +427,7 @@
         const brHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/buckshot-roulette.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
         const dhHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/drift-hunters.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
         const blHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/basketball-legends.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
-
+        const btd4 = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/bloons-td4.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
         
         const sites = {
             "fnae": { name: "Five Nights at Epstein's", enabled: true,  content: fnaeHTML},
@@ -442,6 +442,7 @@
             "buckshot": { name: "Buckshot Roulette", enabled: true,  content: brHTML},
             "drifthunters": { name: "Drift Hunters", enabled: true,  content: dhHTML},
             "basketball": { name: "Basketball Legends 2020", enabled: false,  content: blHTML},
+            "bloonstd4": { name: "Bloons Tower Defense 4", enabled: false,  content: blHTML},
         };
 
         const commandDetails = {
@@ -618,16 +619,17 @@
                         <span>${githubLastUpdate}</span>
                     </div>
                     <div class="log-line" style="display:grid; grid-template-columns: 150px 1fr; line-height:1.2;">
-                        <span>Blocked Counter</span>
+                        <span>Blocked by GoGuardian</span>
                         <span>1</span>
                     </div>
                 `;
             }
             else if (userInput === "credits") {
                 outputBlock.innerHTML += changelog(
-                    "--- CREDITS ---",
-                    "CheddarOS " + OS_VERSION,
-                    "Lead Programmer$- Cheddar Hobbs",
+                    "--- CREDITS ---$CheddarOS" + OS_VERSION,
+                    "Lead Programmer$- Matt Hauber (Cheddar Hobbs)",
+                    "Testers$- James Ethan$- Jadell Vargas (Jelly)$- Vinny Nucci (Vinchenzo)$- Max Dankies$",
+                    "DISCLAIMER$All Testers are not affiliated in any way$with the delveopment of CheddarOS.$The development of CheddarOS is solely by the Lead Programmer",
                 );
             }
             else if (userInput === "changelog") {
