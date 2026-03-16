@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --dos-bg:     #000000;
+            --dos-box:    #0000aa;
+            --dos-white:  #ffffff;
+            --dos-gray:   #aaaaaa;
+            --dos-yellow: #ffff55;
+            --dos-cyan:   #55ffff;
+            --dos-red:    #ff5555;
+            --dos-green:  #55ff55;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: var(--dos-bg);
+        }
+
+        .dos-shell {
+            position: fixed;
+            inset: 0;
+            background: var(--dos-bg);
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 6px 8px 8px 8px;
+        }
+        .dos-shell::-webkit-scrollbar { width: 0; }
+
+        /* Blue info box — NOT full width, fixed natural width */
+        .dos-infobox {
+            display: inline-block;
+            border: 2px solid var(--dos-white);
+            background: var(--dos-box);
+            padding: 6px 14px 8px 10px;
+            margin-bottom: 0;
+            max-width: 620px;
+        }
+
+        .dos-infobox .log-line {
+            color: var(--dos-white);
+        }
+
+        /* All terminal content below the box */
+        .dos-terminal {
+            margin-top: 0;
+        }
+
+        /* Typography */
+        .log-line,
+        .prompt,
+        input,
+        #ghost-input {
+            font-family: 'Lucida Console', 'Courier New', monospace;
+            font-size: 15px;
+            line-height: 1.35;
+        }
+
+        .log-line {
+            color: var(--dos-gray);
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+        }
+
+        .prompt {
+            color: var(--dos-gray);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .input-wrapper {
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--dos-gray);
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            caret-color: var(--dos-gray);
+            z-index: 2;
+        }
+
+        #ghost-input {
+            position: absolute;
+            top: 0; left: 0;
+            color: #333333;
+            pointer-events: none;
+            white-space: pre;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        ::selection { background: var(--dos-white); color: var(--dos-bg); }
+    </style>
+</head>
+<body onclick="document.getElementById('terminalInput').focus()">
+
+<div class="dos-shell" id="dos-shell">
+
+    <div class="dos-infobox">
+        <div class="log-line" id="ver-line" style="color:var(--dos-white);font-weight:bold;">Welcome to CheddarOS</div>
+        <div class="log-line">&nbsp;</div>
+        <div class="log-line">For a list of all commands type <span style="color:var(--dos-yellow)">HELP</span></div>
+        <div class="log-line">To see the most recent updats type <span style="color:var(--dos-yellow)">CHANGELOG</span></div>
+        <div id="announcement-area"></div>
+    </div>
+
+    <!-- Terminal output + input flows naturally below -->
+    <div class="dos-terminal" id="history"></div>
+
+    <div class="log-line">&nbsp;</div>
+
+    <div class="input-row">
+        <span class="prompt">C:\CheddarOS&gt;&nbsp;</span>
+        <div class="input-wrapper">
+            <input type="text" id="terminalInput" autofocus spellcheck="false" autocomplete="off">
+            <div id="ghost-input"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ============================================================ \\
+                         // CHEDDAROS VERSION \\
+                     const OS_VERSION = "vBETA-1.0.0";
+    // ============================================================ \\
+
+    document.getElementById("ver-line").textContent = `Welcome to CheddarOS ${OS_VERSION}`;
+    document.title = `CheddarOS ${OS_VERSION}`;
+
+    let cmdRunCount = 0;
+    let isLaunching = false;
+    let cmdHistory  = [];
+    let historyIdx  = -1;
+
+    let githubLastUpdate  = "";
+    let githubCommitCount = "";
+
+    async function getFailedRifleStats() {
+        try {
+            const commitRes = await fetch('https://api.github.com/repos/FailedRifle/math/commits/main');
+            const commitData = await commitRes.json();
+            const formatter = new Intl.DateTimeFormat('en-US', {
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: 'numeric', minute: '2-digit', hour12: true,
+                timeZone: 'America/New_York', timeZoneName: 'short'
+            });
+            githubLastUpdate = formatter.format(new Date(commitData.commit.committer.date)).replace(',', '');
+        } catch { githubLastUpdate = "Unavailable"; }
+        try {
+            const response = await fetch('https://api.github.com/repos/FailedRifle/math/commits?sha=main&per_page=100');
+            const commits = await response.json();
+            githubCommitCount = Array.isArray(commits) ? commits.length : "Not found";
+        } catch { githubCommitCount = "Unavailable"; }
+    }
+    getFailedRifleStats();
+
+    const ANNOUNCEMENT_TEXT = "test";
+    
+    (function() {
+        const area = document.getElementById("announcement-area");
+        if (!ANNOUNCEMENT_TEXT.trim()) { area.innerHTML = ""; return; }
+        area.innerHTML = `
+            <div class="log-line">&nbsp;</div>
+            <div class="log-line" style="color:var(--dos-red)">[NOTICE] ${ANNOUNCEMENT_TEXT}</div>
+        `;
+    })();
+
+    // ── Game blobs ───────────────────────────────────────────────
+    const fnaeHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/fnae.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const mcHTML   = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/minecraft.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const nzHTML   = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/nz-zombies.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const gdHTML   = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/geometry-dash.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const sm64HTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/sm64.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const sr3dHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/snow-rider-3d.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const tapHTML  = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/throw-a-potato.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const rbHTML   = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/retro-bowl.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const wbHTML   = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/wrestle-bros.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const brHTML   = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/buckshot-roulette.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const dhHTML   = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/drift-hunters.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const blHTML   = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/basketball-legends.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const btd4HTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/bloons-td-4.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+
+    const sites = {
+        "fnae":         { name: "Five Nights at Epstein's",  enabled: true,  content: fnaeHTML  },
+        "geometrydash": { name: "Geometry Dash Lite",        enabled: true,  content: gdHTML    },
+        "minecraft":    { name: "Minecraft v1.12.2",         enabled: true,  content: mcHTML    },
+        "zombies":      { name: "CoD Zombies",               enabled: true,  content: nzHTML    },
+        "sm64":         { name: "Super Mario 64",            enabled: true,  content: sm64HTML  },
+        "potato":       { name: "Throw a Potato",            enabled: true,  content: tapHTML   },
+        "snowrider":    { name: "Snow Rider 3D",             enabled: true,  content: sr3dHTML  },
+        "retrobowl":    { name: "Retro Bowl",                enabled: true,  content: rbHTML    },
+        "wrestlebros":  { name: "Wrestle Bros",              enabled: false, content: wbHTML    },
+        "buckshot":     { name: "Buckshot Roulette",         enabled: true,  content: brHTML    },
+        "drifthunters": { name: "Drift Hunters",             enabled: true,  content: dhHTML    },
+        "basketball":   { name: "Basketball Legends 2020",   enabled: false, content: blHTML    },
+        "bloonstd4":    { name: "Bloons Tower Defense 4",    enabled: false, content: btd4HTML  },
+    };
+
+    const commandDetails = {
+        "changelog": "View recent system updates.",
+        "clear":     "Clear the terminal screen.",
+        "credits":   "View the authors and contributors.",
+        "gamelist":  "List all available games.",
+        "help":      "Display this help menu.",
+        "info":      "View repository and build information."
+    };
+
+    const inputField  = document.getElementById("terminalInput");
+    const ghostField  = document.getElementById("ghost-input");
+    const historyArea = document.getElementById("history");
+    const scrollEl    = document.getElementById("dos-shell");
+    const allSugg     = [...Object.keys(commandDetails), ...Object.keys(sites)].sort();
+
+    function smartScroll() {
+        scrollEl.scrollTop = scrollEl.scrollHeight;
+    }
+
+    function ln(text, color) {
+        const s = color ? ` style="color:${color}"` : '';
+        return `<div class="log-line"${s}>${text}</div>`;
+    }
+    const blank = () => `<div class="log-line">&nbsp;</div>`;
+
+    function changelog(...entries) {
+        return entries.map(e => `<div class="log-line">${e.split('$').join('<br>')}</div>${blank()}`).join('');
+    }
+
+    function openInBlank(siteObj) {
+        const w = window.open('about:blank', '_blank');
+        if (!w || w.closed || typeof w.closed === 'undefined') return false;
+        w.document.write(siteObj.content);
+        w.document.close();
+        return true;
+    }
+
+    async function fakeLoad(siteKey) {
+        isLaunching = true;
+        inputField.disabled = true;
+        const sd = sites[siteKey];
+        const ob = document.createElement("div");
+        historyArea.appendChild(ob);
+
+        if (!sd.enabled) {
+            ob.innerHTML += ln(`'${sd.name}' is not currently available.`, 'var(--dos-red)');
+            ob.innerHTML += ln(`This game has been taken offline because of an error.`, 'var(--dos-yellow)');
+            ob.innerHTML += ln(`Please check back next update to see the status of the game.`, 'var(--dos-yellow)');
+            isLaunching = false; inputField.disabled = false; inputField.focus(); smartScroll(); return;
+        }
+
+        const total    = Math.floor(sd.content.length / 2);
+        const duration = Math.min((total / 300) * 1500, 4000);
+        ob.innerHTML  += ln(`Searching for ${sd.name}...`);
+        const loadLine = document.createElement("div");
+        loadLine.className = "log-line";
+        ob.appendChild(loadLine);
+        const t0 = Date.now();
+        while (true) {
+            const p   = Math.min((Date.now() - t0) / duration, 1);
+            const cur = Math.floor(p * total);
+            const W   = 30;
+            const bar = '█'.repeat(Math.floor(p * W)) + '░'.repeat(W - Math.floor(p * W));
+            loadLine.innerHTML = `<span style="color:var(--dos-cyan)">[${bar}]</span> ${cur}/${total}`;
+            smartScroll();
+            if (p >= 1) break;
+            await new Promise(r => setTimeout(r, Math.random() > 0.9 ? 60 : 15));
+        }
+        const ok = openInBlank(sd);
+        ob.innerHTML += ok
+            ? ln(`${sd.name} launched successfully.`, 'var(--dos-green)')
+            : ln(`ERROR: Popup was blocked by browser.`, 'var(--dos-red)') + ln(`Please allow popups and type "${siteKey}" again.`, 'var(--dos-red)');
+        isLaunching = false; inputField.disabled = false; inputField.focus(); smartScroll();
+    }
+
+    inputField.addEventListener('input', () => {
+        const val = inputField.value.toLowerCase();
+        if (!val) { ghostField.innerText = ""; return; }
+        const m = allSugg.find(s => s.startsWith(val));
+        ghostField.innerText = m ? val + m.slice(val.length) : "";
+    });
+
+    inputField.addEventListener('keydown', e => {
+        if (isLaunching) return;
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (cmdHistory.length > 0 && historyIdx < cmdHistory.length - 1) {
+                historyIdx++;
+                inputField.value = cmdHistory[cmdHistory.length - 1 - historyIdx];
+            }
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (historyIdx > 0) { historyIdx--; inputField.value = cmdHistory[cmdHistory.length - 1 - historyIdx]; }
+            else { historyIdx = -1; inputField.value = ""; }
+        } else if (e.key === 'Tab') {
+            e.preventDefault();
+            if (ghostField.innerText) { inputField.value = ghostField.innerText; ghostField.innerText = ""; }
+        } else if (e.key === 'Enter') {
+            ghostField.innerText = ""; handleInput();
+        }
+    });
+
+    function handleInput() {
+        const rawInput = inputField.value.trim();
+        if (rawInput === "") return;
+        cmdHistory.push(rawInput);
+        historyIdx = -1;
+        const userInput = rawInput.toLowerCase();
+        cmdRunCount++;
+
+        historyArea.innerHTML += ln(`C:\\CheddarOS&gt; ${rawInput}`);
+        const ob = document.createElement("div");
+        historyArea.appendChild(ob);
+
+        if (userInput === "help") {
+            ob.innerHTML += blank();
+            let lastLetter = "";
+            Object.keys(commandDetails).sort().forEach(cmd => {
+                const cur = cmd[0].toLowerCase();
+                if (lastLetter !== "" && cur !== lastLetter) ob.innerHTML += blank();
+                lastLetter = cur;
+                ob.innerHTML += `<div class="log-line" style="display:grid;grid-template-columns:160px 1fr;line-height:1.35;">
+                    <span style="color:var(--dos-yellow)">${cmd}</span>
+                    <span>${commandDetails[cmd]}</span>
+                </div>`;
+            });
+            ob.innerHTML += blank();
+        }
+        else if (userInput === "clear") {
+            historyArea.innerHTML = ""; ob.remove();
+        }
+        else if (userInput === "info") {
+            ob.innerHTML += blank();
+            ob.innerHTML += ln("CheddarOS System Information", 'var(--dos-yellow)');
+            ob.innerHTML += `<div class="log-line" style="display:grid;grid-template-columns:160px 1fr;line-height:1.35;"><span>System-Version</span><span>${OS_VERSION}</span></div>`;
+            ob.innerHTML += `<div class="log-line" style="display:grid;grid-template-columns:160px 1fr;line-height:1.35;"><span>Version</span><span>${githubCommitCount}</span></div>`;
+            ob.innerHTML += `<div class="log-line" style="display:grid;grid-template-columns:160px 1fr;line-height:1.35;"><span>Last Updated</span><span>${githubLastUpdate}</span></div>`;
+            ob.innerHTML += `<div class="log-line" style="display:grid;grid-template-columns:160px 1fr;line-height:1.35;"><span>Blocked Counter</span><span>1</span></div>`;
+            ob.innerHTML += blank();
+        }
+        else if (userInput === "credits") {
+            ob.innerHTML += blank() + changelog(
+                "--- CREDITS ---$CheddarOS " + OS_VERSION,
+                "Lead Programmer$- Matt Hauber (Cheddar Hobbs)",
+                "Testers$- James Ethan$- Jadell Vargas (Jelly)$- Vinny Nucci (Vinchenzo)$- Max Dankies$",
+                "DISCLAIMER$All Testers are not affiliated in any way$with the development of CheddarOS.$The development of CheddarOS is solely by the Lead Programmer",
+            );
+        }
+        else if (userInput === "changelog") {
+            ob.innerHTML += blank() + changelog(
+                "--- CHANGELOG ---",
+                "3/14/2026$vALPHA-2.1.3$- Fixed Bloons TD4",
+                "3/13/2026$vALPHA-2.1.2$- Added Bloons TD4$- Fixed formatting$- Minor bug fixes",
+                "3/11/2026$vALPHA-2.1.1$- Added Basketball Legends$- Basketball Legends offline while looking for GoGuardian bypass",
+                "3/9/2026$vALPHA-2.1.0$- Completely changed how games load$- Games load faster than ever$- Reduced lag in every game and inside CheddarOS$- Fixed GoGuardian bypass for Buckshot Roulette$- Shell Shockers removed",
+                "3/8/2026$vALPHA-2.0.3$- Added Drift Hunters",
+                "3/7/2026$vALPHA-2.0.2$- Added a info command to see more information about CheddarOS",
+                "3/7/2026$vALPHA-2.0.1$- Formatted the games and the help list to look more professional$- Added an announcement text$- Minor bug fixes",
+                "3/4/2026$vALPHA-2.0.0$- Completely revamped the UI$- Changed tab name and icon",
+                "2/27/2026$vALPHA-1.1.0$- Massive Code Cleanup",
+                "2/27/2026$vALPHA-1.0.10$- Added Buckshot Roulette",
+                "2/27/2026$vALPHA-1.0.9$- Added Wrestle Bros",
+                "2/27/2026$vALPHA-1.0.8$- Formatted the credits screen",
+                "2/26/2026$vALPHA-1.0.7$- Added Shell Shockers",
+                "2/26/2026$vALPHA-1.0.6$- Added Retro Bowl",
+                "2/26/2026$vALPHA-1.0.5b$- Minor bug fixes$- Cut the loading speed in half.",
+                "2/25/2026$vALPHA-1.0.5$- Throw a Potato fixed$- Removed ads$- FNaE revamp$- Fixed Snow Rider 3D black screen",
+                "2/25/2026$vALPHA-1.0.4$- FNaE back online",
+                "2/25/2026$vALPHA-1.0.3$- FNaE taken offline$- Throw a Potato offline (GoGuardian)",
+                "2/23/2026$vALPHA-1.0.2$- Minor fixes$- Throw a Potato playable$- Added Snow Rider 3D (WIP)",
+                "2/23/2026$vALPHA-1.0.1$- Throw a Potato maintenance",
+                "2/23/2026$vALPHA-1.0.0$- CheddarOS early private access release."
+            );
+        }
+        else if (userInput === "gamelist") {
+            ob.innerHTML += blank();
+            const groups = {};
+            Object.keys(sites).sort().forEach(key => {
+                const fc = key[0].toLowerCase();
+                if (!groups[fc]) groups[fc] = [];
+                groups[fc].push(key);
+            });
+            Object.keys(groups).sort().forEach((letter, i) => {
+                if (i > 0) ob.innerHTML += blank();
+                groups[letter].sort((a, b) => {
+                    if (sites[a].enabled === sites[b].enabled) return a.localeCompare(b);
+                    return sites[a].enabled ? -1 : 1;
+                }).forEach(key => {
+                    const col   = sites[key].enabled ? 'var(--dos-gray)' : 'var(--dos-red)';
+                    const badge = sites[key].enabled ? '' : ' <span style="color:var(--dos-red)">[OFFLINE]</span>';
+                    ob.innerHTML += `<div class="log-line" style="display:grid;grid-template-columns:160px 1fr;color:${col};line-height:1.35;">
+                        <span style="color:var(--dos-yellow)">${key}</span>
+                        <span>(${sites[key].name})${badge}</span>
+                    </div>`;
+                });
+            });
+            ob.innerHTML += blank();
+        }
+        else if (sites[userInput]) {
+            ob.remove(); fakeLoad(userInput);
+        }
+        else {
+            ob.innerHTML += ln(`'${rawInput}' is not recognized as an internal or external command,`);
+            ob.innerHTML += ln(`operable program or batch file.`);
+            ob.innerHTML += blank();
+        }
+
+        inputField.value = "";
+        smartScroll();
+    }
+</script>
+</body>
+</html>
