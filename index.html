@@ -120,7 +120,6 @@
         <div id="announcement-area"></div>
     </div>
 
-    <!-- Terminal output + input flows naturally below -->
     <div class="dos-terminal" id="history"></div>
 
     <div class="log-line">&nbsp;</div>
@@ -219,7 +218,6 @@
         "gamelist":  "List all available games.",
         "help":      "Display this help menu.",
         "info":      "View repository and build information.",
-        "update":    "Updates to the most recent version of CheddarOS.",
     };
 
     const inputField  = document.getElementById("terminalInput");
@@ -362,30 +360,10 @@
                 "DISCLAIMER$All Testers and Contributors are not affiliated in any way with the development of CheddarOS.",
             );
         }
-        else if (userInput === "update") {
-            ob.innerHTML += blank() + ln("Checking for updates...", "var(--dos-cyan)");
-            fetch('https://raw.githubusercontent.com/failedrifle/math/main/index.html')
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.text();
-                })
-                .then(html => {
-                    ob.innerHTML += ln("Update found! Applying changes...", "var(--dos-green)");
-                    setTimeout(() => {
-                        document.open();
-                        document.write(html);
-                        document.close();
-                    }, 1000);
-                })
-                .catch(err => {
-                    ob.innerHTML += ln("FAILED: Could not reach update server.", "var(--dos-red)");
-                    ob.innerHTML += ln(err.message, "var(--dos-gray)");
-                });
-        }
         else if (userInput === "changelog") {
             ob.innerHTML += blank() + changelog(
                 "--- CHANGELOG ---",
-                "3/99/2026$vBETA-1.0.0$- Finally out of alpha and into open beta$- Revamped UI again to be more unique$- New UPDATE command which updates CheddarOS inside the console$- Console, games, and the password are now under 1 tab$- Welcoming new testers to CheddarOS",
+                "3/99/2026$vBETA-1.0.0$- Finally out of alpha and into open beta$- Revamped UI again to be more unique$- Console, games, and the password are now under 1 tab$- Welcoming new testers to CheddarOS",
                 "3/14/2026$vALPHA-2.1.3$- Fixed Bloons TD4",
                 "3/13/2026$vALPHA-2.1.2$- Added Bloons TD4$- Fixed formatting$- Minor bug fixes",
                 "3/11/2026$vALPHA-2.1.1$- Added Basketball Legends$- Basketball Legends offline while looking for GoGuardian bypass",
