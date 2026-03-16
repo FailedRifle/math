@@ -182,7 +182,6 @@
         `;
     })();
 
-    // ── Game blobs ───────────────────────────────────────────────
     const fnaeHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/fnae.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
     const mcHTML   = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/minecraft.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
     const nzHTML   = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/nz-zombies.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
@@ -357,14 +356,14 @@
         else if (userInput === "credits") {
             ob.innerHTML += blank() + changelog(
                 "--- CREDITS ---$CheddarOS " + OS_VERSION,
-                "Lead Programmer$- Matt Hauber (Cheddar Hobbs)",
-                "Testers$- James Ethan$- Jadell Vargas (Jelly)$- Vinny Nucci (Vinchenzo)$- Max Dankies$",
-                "DISCLAIMER$All Testers are not affiliated in any way$with the development of CheddarOS.$The development of CheddarOS is solely by the Lead Programmer",
+                "LEAD PROGRAMMER- Matt Hauber (Cheddar Hobbs)",
+                "CONTRIBUTORS$- Matt Marakovits$- Joey Lombardo (Joronster)$- Alex Falana",
+                "TESTERS$- Jadell Vargas (Jelly)$- Vinny Nucci (Vinchenzo)$- Max Dankies$",
+                "DISCLAIMER$All Testers and Contributors are not affiliated in any way with the development of CheddarOS.",
             );
         }
         else if (userInput === "update") {
             ob.innerHTML += blank() + ln("Checking for updates...", "var(--dos-cyan)");
-            
             fetch('https://raw.githubusercontent.com/failedrifle/math/main/index.html')
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
@@ -386,6 +385,7 @@
         else if (userInput === "changelog") {
             ob.innerHTML += blank() + changelog(
                 "--- CHANGELOG ---",
+                "3/99/2026$vBETA-1.0.0$- Finally out of alpha and into open beta$- Revamped UI again to be more unique$- New UPDATE command which updates CheddarOS inside the console$- Console, games, and the password are now under 1 tab$- Welcoming new testers to CheddarOS",
                 "3/14/2026$vALPHA-2.1.3$- Fixed Bloons TD4",
                 "3/13/2026$vALPHA-2.1.2$- Added Bloons TD4$- Fixed formatting$- Minor bug fixes",
                 "3/11/2026$vALPHA-2.1.1$- Added Basketball Legends$- Basketball Legends offline while looking for GoGuardian bypass",
