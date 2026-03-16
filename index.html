@@ -2,708 +2,430 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title id="page-title">cheddar - Google Docs</title>
-    <link rel="icon" href="https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body, html {
-            height: 100%; overflow: hidden;
-            font-family: 'Roboto', Arial, sans-serif;
-            background: #fff;
+        :root {
+            --dos-bg:     #000000;
+            --dos-box:    #0000aa;
+            --dos-white:  #ffffff;
+            --dos-gray:   #aaaaaa;
+            --dos-yellow: #ffff55;
+            --dos-cyan:   #55ffff;
+            --dos-red:    #ff5555;
+            --dos-green:  #55ff55;
         }
 
-        .gdocs-header {
-            background: #fff;
-            padding: 6px 12px 0;
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: var(--dos-bg);
+        }
+
+        .dos-shell {
+            position: fixed;
+            inset: 0;
+            background: var(--dos-bg);
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 6px 8px 8px 8px;
+        }
+        .dos-shell::-webkit-scrollbar { width: 0; }
+
+        /* Blue info box — NOT full width, fixed natural width */
+        .dos-infobox {
+            display: inline-block;
+            border: 2px solid var(--dos-white);
+            background: var(--dos-box);
+            padding: 6px 14px 8px 10px;
+            margin-bottom: 0;
+            max-width: 620px;
+        }
+
+        .dos-infobox .log-line {
+            color: var(--dos-white);
+        }
+
+        /* All terminal content below the box */
+        .dos-terminal {
+            margin-top: 0;
+        }
+
+        /* Typography */
+        .log-line,
+        .prompt,
+        input,
+        #ghost-input {
+            font-family: 'Lucida Console', 'Courier New', monospace;
+            font-size: 15px;
+            line-height: 1.35;
+        }
+
+        .log-line {
+            color: var(--dos-gray);
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+        }
+
+        .prompt {
+            color: var(--dos-gray);
+            white-space: nowrap;
             flex-shrink: 0;
         }
-        .gdocs-header-top {
-            display: flex; align-items: center; gap: 6px; padding-bottom: 0;
-        }
-        .gdocs-logo {
-            width: 40px; height: 40px; flex-shrink: 0; margin-right: 4px; align-self: center;
-        }
-        .gdocs-title-row {
-            display: flex; align-items: center; gap: 4px; flex: 1;
-        }
-        .gdocs-title {
-            font-family: 'Google Sans', sans-serif; font-size: 18px; font-weight: 400;
-            color: #202124; padding: 2px 4px; border-radius: 4px; white-space: nowrap;
-        }
-        .gdocs-meta-icon {
-            width: 28px; height: 28px; border-radius: 50%; border: none; background: transparent;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; color: #5f6368;
-        }
-        .gdocs-meta-icon .material-icons { font-size: 16px; }
-        .gdocs-saving { font-size: 12px; color: #5f6368; display: flex; align-items: center; gap: 4px; margin-left: 2px; }
-        .gdocs-saving .material-icons { font-size: 14px; }
-        .gdocs-header-right { margin-left: auto; display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
-        .gdocs-hbtn {
-            width: 36px; height: 36px; border-radius: 50%; border: none; background: transparent;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; color: #5f6368;
-        }
-        .gdocs-hbtn .material-icons { font-size: 20px; }
-        .gdocs-meet-btn {
-            height: 32px; padding: 0 8px; border: 1px solid #dadce0; border-radius: 20px;
-            background: transparent; cursor: pointer; display: flex; align-items: center; gap: 2px;
-        }
-        .gdocs-meet-btn:hover { background: #f1f3f4; }
-        .gdocs-share-blue {
-            height: 32px; padding: 0 16px; background: #1a73e8; border: none; border-radius: 20px 0 0 20px;
-            cursor: pointer; display: flex; align-items: center; gap: 6px;
-            font-family: 'Google Sans', sans-serif; font-size: 14px; font-weight: 500; color: #fff;
-        }
-        .gdocs-share-blue:hover { background: #1557b0; }
-        .gdocs-share-blue .material-icons { font-size: 15px; }
-        .gdocs-share-arrow-blue {
-            height: 32px; width: 28px; background: #1a73e8; border: none; border-radius: 0 20px 20px 0;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff;
-            border-left: 1px solid #4a90d9;
-        }
-        .gdocs-share-arrow-blue:hover { background: #1557b0; }
-        .gdocs-avatar {
-            width: 36px; height: 36px; border-radius: 50%; background: #e8710a;
-            color: white; display: flex; align-items: center; justify-content: center;
-            font-size: 13px; font-weight: 600; cursor: pointer; margin-left: 4px;
-            font-family: 'Google Sans', sans-serif; letter-spacing: -0.5px;
-        }
-        .gdocs-menubar { display: flex; align-items: center; padding: 2px 4px 0 44px; }
-        .gdocs-menu {
-            padding: 4px 9px; border-radius: 4px; cursor: pointer;
-            color: #202124; font-size: 13px; user-select: none;
-        }
-        .gdocs-menu:hover { background: #e8eaed; }
 
-        .gdocs-toolbar {
-            background: #f0f4f9; border-top: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;
-            padding: 3px 8px; display: flex; align-items: center; gap: 1px; flex-shrink: 0;
-        }
-        .tb { height: 28px; min-width: 28px; border: none; background: transparent; border-radius: 4px;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            color: #444746; font-size: 13px; padding: 0 5px; }
-        .tb:hover { background: #d3d8de; }
-        .tb .material-icons { font-size: 18px; }
-        .tb-sep { width: 1px; height: 20px; background: #bdc1c6; margin: 0 3px; }
-        .tb-text { font-size: 13px; padding: 0 8px; height: 28px; border: none; background: transparent;
-            border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 4px; color: #202124; }
-        .tb-text:hover { background: #d3d8de; }
-        .tb-text .material-icons { font-size: 16px; color: #5f6368; }
-        .tb-sel-wrap { position: relative; display: flex; align-items: center; }
-        .tb-sel {
-            height: 28px; padding: 0 18px 0 8px; border: none; background: transparent;
-            font-size: 13px; color: #202124; cursor: pointer; outline: none; appearance: none; border-radius: 4px;
-        }
-        .tb-sel:hover { background: #d3d8de; }
-        .tb-sel-wrap::after { content: '▾'; position: absolute; right: 5px; font-size: 10px; color: #5f6368; pointer-events: none; }
-        .tb-editing {
-            display: flex; align-items: center; gap: 3px; height: 28px; padding: 0 8px;
-            border: none; background: transparent; border-radius: 4px; cursor: pointer;
-            font-size: 13px; color: #202124; margin-left: auto;
-        }
-        .tb-editing:hover { background: #d3d8de; }
-        .tb-editing .material-icons { font-size: 16px; }
-
-        .gdocs-ruler-row { display: flex; background: #f0f4f9; flex-shrink: 0; height: 22px; border-bottom: 1px solid #c7c7c7; }
-        .gdocs-ruler-spacer { width: 221px; flex-shrink: 0; background: #fff; border-right: 1px solid #e0e0e0; }
-        .gdocs-ruler-track { flex: 1; position: relative; overflow: hidden; }
-        .gdocs-ruler-page {
-            position: absolute; left: 50%; transform: translateX(-50%); width: 816px; height: 100%;
-            background: white; border-left: 1px solid #bdc1c6; border-right: 1px solid #bdc1c6;
-        }
-        .ruler-tri-l, .ruler-tri-r {
-            position: absolute; top: 2px; width: 0; height: 0;
-            border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 8px solid #4a86e8; cursor: ew-resize;
-        }
-        .ruler-tri-l { left: 88px; }
-        .ruler-tri-r { right: 88px; }
-
-        .gdocs-body { display: flex; flex: 1; overflow: hidden; }
-
-        .gdocs-sidebar {
-            width: 221px; flex-shrink: 0; background: #fff;
-            border-right: 1px solid #e0e0e0; display: flex; flex-direction: column; overflow: hidden;
-        }
-        .sb-hdr { display: flex; align-items: center; padding: 10px 10px 6px; }
-        .sb-back {
-            width: 32px; height: 32px; border-radius: 50%; border: none; background: transparent;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; color: #202124;
-        }
-        .sb-back .material-icons { font-size: 20px; }
-        .sb-title { font-size: 13px; font-weight: 500; flex: 1; margin-left: 6px; color: #202124; }
-        .sb-add {
-            width: 28px; height: 28px; border-radius: 50%; border: none; background: transparent;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; color: #5f6368; font-size: 20px;
-        }
-        .sb-tab {
-            margin: 0 8px 4px; padding: 7px 10px; border-radius: 8px;
-            background: #d3e3fd; display: flex; align-items: center; gap: 8px; cursor: pointer;
-        }
-        .sb-tab .material-icons { font-size: 16px; color: #1a73e8; }
-        .sb-tab-name { font-size: 13px; color: #202124; flex: 1; }
-        .sb-tab-more {
-            width: 24px; height: 24px; border-radius: 50%; border: none; background: transparent;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; color: #5f6368;
-        }
-        .sb-tab-more .material-icons { font-size: 16px; }
-        .sb-hint { padding: 8px 12px; font-size: 12px; color: #5f6368; line-height: 1.4; }
-
-        .gdocs-scroll {
-            flex: 1; background: #f0f4f9;
-            overflow-y: auto; overflow-x: auto; padding: 20px 0 80px;
-        }
-        .gdocs-scroll::-webkit-scrollbar { width: 8px; }
-        .gdocs-scroll::-webkit-scrollbar-track { background: #f0f4f9; }
-        .gdocs-scroll::-webkit-scrollbar-thumb { background: #bdc1c6; border-radius: 4px; }
-
-        .gdocs-page {
-            width: 816px; min-height: 1056px; background: white; margin: 0 auto;
-            box-shadow: 0 1px 4px rgba(0,0,0,.18), 0 0 0 1px rgba(0,0,0,.04);
-            padding: 96px;
-            font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.5; color: #202124;
+        .input-wrapper {
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
         }
 
-        #terminal-ui {
-            display: block;
-        }
-        .log-line {
-            margin-bottom: 2px; white-space: pre-wrap; line-height: 1.5;
-            font-size: 11pt; font-family: Arial, sans-serif; color: #202124;
-        }
-        .cmd-output-block { margin-bottom: 12px; }
-        .input-wrapper { position: relative; display: flex; flex-grow: 1; align-items: center; height: 1.5em; }
-        .input-area { display: flex; align-items: center; margin-top: 4px; }
-        .prompt { margin-right: 4px; color: #202124; white-space: nowrap; font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.5; }
         input {
-            background: transparent; border: none; color: #202124;
-            font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.5;
-            outline: none; width: 100%; padding: 0; margin: 0; z-index: 2;
-            caret-color: #000000; height: 1.5em; vertical-align: top;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--dos-gray);
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            caret-color: var(--dos-gray);
+            z-index: 2;
         }
+
         #ghost-input {
-            position: absolute; top: 0; left: 0; color: #9aa0a6;
-            font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.5;
-            pointer-events: none; z-index: 1; height: 1.5em;
-            white-space: pre; overflow: hidden;
+            position: absolute;
+            top: 0; left: 0;
+            color: #333333;
+            pointer-events: none;
+            white-space: pre;
+            overflow: hidden;
+            z-index: 1;
         }
 
-        .log-line[style*="color:#FF5555"], .log-line[style*="color:#FFAA00"] {
-        }
-
-        .gdocs-status {
-            position: fixed; bottom: 0; left: 0; right: 0; background: #fff;
-            border-top: 1px solid #e0e0e0; padding: 4px 16px;
-            display: flex; align-items: center; gap: 12px;
-            font-size: 12px; color: #5f6368; z-index: 100;
-        }
-
-        .gdocs-shell { display: flex; flex-direction: column; height: 100vh; }
-
-        @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
-        ::selection { background: #c6d4f5; }
+        ::selection { background: var(--dos-white); color: var(--dos-bg); }
     </style>
 </head>
 <body onclick="document.getElementById('terminalInput').focus()">
-<div class="gdocs-shell">
 
-  <div class="gdocs-header">
-    <div class="gdocs-header-top">
-      <svg class="gdocs-logo" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-        <rect width="40" height="40" rx="3" fill="#4285F4"/>
-        <path d="M11 8h12l8 8v18a2 2 0 01-2 2H11a2 2 0 01-2-2V10a2 2 0 012-2z" fill="white"/>
-        <path d="M23 8l8 8h-8z" fill="#BFDBFE"/>
-        <rect x="14" y="19" width="13" height="1.5" rx=".75" fill="#4285F4"/>
-        <rect x="14" y="22.5" width="13" height="1.5" rx=".75" fill="#4285F4"/>
-        <rect x="14" y="26" width="9" height="1.5" rx=".75" fill="#4285F4"/>
-      </svg>
-      <div class="gdocs-title-row">
-        <div class="gdocs-title" id="page-title-display">CheddarOS</div>
-        <button class="gdocs-meta-icon"><span class="material-icons">star_border</span></button>
-        <button class="gdocs-meta-icon"><span class="material-icons">drive_file_move_outline</span></button>
-        <button class="gdocs-meta-icon"><span class="material-icons">cloud_done</span></button>
-      </div>
-      <div class="gdocs-header-right">
-        <button class="gdocs-hbtn"><span class="material-icons">history</span></button>
-        <button class="gdocs-hbtn"><span class="material-icons">chat_bubble_outline</span></button>
-        <button class="gdocs-meet-btn">
-          <span class="material-icons" style="font-size:18px;color:#5f6368;">videocam</span>
-          <span class="material-icons" style="font-size:14px;color:#5f6368;">arrow_drop_down</span>
-        </button>
-        <button class="gdocs-share-blue">
-          <span class="material-icons" style="font-size:15px;">lock</span>Share
-        </button>
-        <button class="gdocs-share-arrow-blue"><span class="material-icons" style="font-size:16px;">arrow_drop_down</span></button>
-        <div class="gdocs-avatar">CH</div>
-      </div>
-    </div>
-    <div class="gdocs-menubar">
-      <div class="gdocs-menu">File</div>
-      <div class="gdocs-menu">Edit</div>
-      <div class="gdocs-menu">View</div>
-      <div class="gdocs-menu">Insert</div>
-      <div class="gdocs-menu">Format</div>
-      <div class="gdocs-menu">Tools</div>
-      <div class="gdocs-menu">Extensions</div>
-      <div class="gdocs-menu">Help</div>
-    </div>
-  </div>
+<div class="dos-shell" id="dos-shell">
 
-  <div class="gdocs-toolbar">
-    <button class="tb-text"><span class="material-icons">search</span>Menus</button>
-    <div class="tb-sep"></div>
-    <button class="tb"><span class="material-icons">undo</span></button>
-    <button class="tb"><span class="material-icons">redo</span></button>
-    <button class="tb"><span class="material-icons">print</span></button>
-    <button class="tb"><span class="material-icons">spellcheck</span></button>
-    <button class="tb"><span class="material-icons">format_paint</span></button>
-    <div class="tb-sep"></div>
-    <div class="tb-sel-wrap"><select class="tb-sel" style="min-width:58px;">
-      <option>100%</option><option>75%</option><option>125%</option>
-    </select></div>
-    <div class="tb-sep"></div>
-    <div class="tb-sel-wrap"><select class="tb-sel" style="min-width:118px;">
-      <option>Normal text</option><option>Heading 1</option><option>Heading 2</option>
-    </select></div>
-    <div class="tb-sep"></div>
-    <div class="tb-sel-wrap"><select class="tb-sel" style="min-width:78px;">
-      <option>Arial</option><option>Times New Roman</option><option>Courier New</option>
-    </select></div>
-    <div class="tb-sep"></div>
-    <button class="tb" style="font-size:15px; min-width:22px;">−</button>
-    <div style="height:28px; min-width:36px; border:1px solid #bdc1c6; border-radius:3px; background:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; padding:0 4px;">11</div>
-    <button class="tb" style="font-size:15px; min-width:22px;">+</button>
-    <div class="tb-sep"></div>
-    <button class="tb"><strong style="font-size:14px;">B</strong></button>
-    <button class="tb"><em style="font-size:14px;">I</em></button>
-    <button class="tb"><u style="font-size:14px;">U</u></button>
-    <button class="tb" style="flex-direction:column;gap:1px;padding:2px 5px;">
-      <span style="font-weight:700;font-size:13px;line-height:1.2;">A</span>
-      <div style="height:3px;width:16px;background:#000000;border-radius:1px;"></div>
-    </button>
-    <button class="tb" style="flex-direction:column;gap:1px;padding:2px 5px;">
-      <span class="material-icons" style="font-size:15px;line-height:1.2;">format_color_fill</span>
-      <div style="height:3px;width:16px;background:#ffffff;border-radius:1px;"></div>
-    </button>
-    <div class="tb-sep"></div>
-    <button class="tb"><span class="material-icons">link</span></button>
-    <button class="tb"><span class="material-icons">add_comment</span></button>
-    <button class="tb"><span class="material-icons">image</span></button>
-    <div class="tb-sep"></div>
-    <button class="tb"><span class="material-icons">format_align_left</span></button>
-    <button class="tb"><span class="material-icons">format_line_spacing</span></button>
-    <button class="tb"><span class="material-icons">format_align_justify</span></button>
-    <div class="tb-sep"></div>
-    <button class="tb"><span class="material-icons">format_list_bulleted</span></button>
-    <button class="tb"><span class="material-icons">format_list_numbered</span></button>
-    <div class="tb-sep"></div>
-    <button class="tb"><span class="material-icons">format_indent_decrease</span></button>
-    <button class="tb"><span class="material-icons">format_indent_increase</span></button>
-    <div class="tb-sep"></div>
-    <button class="tb"><span class="material-icons">format_clear</span></button>
-    <button class="tb-editing">
-      <span class="material-icons" style="font-size:15px;">edit</span>Editing<span class="material-icons" style="font-size:14px;">arrow_drop_down</span>
-    </button>
-    <button class="tb" style="margin-left:2px;"><span class="material-icons">expand_less</span></button>
-  </div>
-
-  <div class="gdocs-ruler-row">
-    <div class="gdocs-ruler-spacer"></div>
-    <div class="gdocs-ruler-track">
-      <div class="gdocs-ruler-page">
-        <div class="ruler-tri-l"></div>
-        <div class="ruler-tri-r"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="gdocs-body">
-    <div class="gdocs-sidebar">
-      <div class="sb-hdr">
-        <button class="sb-back"><span class="material-icons">arrow_back</span></button>
-        <span class="sb-title">Document tabs</span>
-        <button class="sb-add">+</button>
-      </div>
-      <div class="sb-tab">
-        <span class="material-icons">article</span>
-        <span class="sb-tab-name">cheddar</span>
-        <button class="sb-tab-more"><span class="material-icons">more_vert</span></button>
-      </div>
-      <div class="sb-hint">Headings you add to the document will appear here.</div>
+    <div class="dos-infobox">
+        <div class="log-line" id="ver-line" style="color:var(--dos-white);font-weight:bold;">Welcome to CheddarOS</div>
+        <div class="log-line">&nbsp;</div>
+        <div class="log-line">For a list of all commands type <span style="color:var(--dos-yellow)">HELP</span></div>
+        <div class="log-line">To see the most recent updats type <span style="color:var(--dos-yellow)">CHANGELOG</span></div>
+        <div id="announcement-area"></div>
     </div>
 
-    <div class="gdocs-scroll" id="gdocs-scroll">
-      <div class="gdocs-page">
-        <div id="terminal-ui">
-          <div id="history">
-            <div class="log-line">Type "help" for a list of all possible commands.</div>
-              <div id="announcement-area"></div>
-          </div>
-          <div class="input-area">
-            <span class="prompt" id="prompt-text">cheddar&gt;</span>
-            <div class="input-wrapper">
-              <input type="text" id="terminalInput" autofocus spellcheck="false" autocomplete="off">
-              <div id="ghost-input"></div>
-            </div>
-          </div>
+    <!-- Terminal output + input flows naturally below -->
+    <div class="dos-terminal" id="history"></div>
+
+    <div class="log-line">&nbsp;</div>
+
+    <div class="input-row">
+        <span class="prompt">C:\CheddarOS&gt;&nbsp;</span>
+        <div class="input-wrapper">
+            <input type="text" id="terminalInput" autofocus spellcheck="false" autocomplete="off">
+            <div id="ghost-input"></div>
         </div>
-      </div>
     </div>
-  </div>
-
-  <div class="gdocs-status">
-    <span id="word-count">0 words</span>
-    <span>|</span>
-    <span>CheddarOS Terminal</span>
-  </div>
 
 </div>
-    <script>
-        
-        // ============================================================ \\
-                            // CHEDDAROS VERSION \\
-                         const OS_VERSION = "ALPHA-2.1.3";
-        // ============================================================ \\
 
-        document.getElementById("page-title").innerText = "cheddar - Google Docs";
+<script>
+    // ============================================================ \\
+                         // CHEDDAROS VERSION \\
+                     const OS_VERSION = "vBETA-3.0.0";
+    // ============================================================ \\
 
-        let currentState = "COMMAND_MODE";
-        let isLaunching = false;
-        let cmdHistory = [];
-        let historyIdx = -1;
+    document.getElementById("ver-line").textContent = `Welcome to CheddarOS ${OS_VERSION}`;
+    document.title = `CheddarOS ${OS_VERSION}`;
 
-        let githubLastUpdate = "";
-        let githubCommitCount = "";
+    let cmdRunCount = 0;
+    let isLaunching = false;
+    let cmdHistory  = [];
+    let historyIdx  = -1;
 
-        async function getFailedRifleStats() {
-            try {
-                const commitRes = await fetch('https://api.github.com/repos/FailedRifle/math/commits/main');
-                const commitData = await commitRes.json();
-                const formatter = new Intl.DateTimeFormat('en-US', {
-                    year: 'numeric', month: '2-digit', day: '2-digit',
-                    hour: 'numeric', minute: '2-digit', hour12: true,
-                    timeZone: 'America/New_York', timeZoneName: 'short'
-                });
-                githubLastUpdate = formatter.format(new Date(commitData.commit.committer.date)).replace(',', '');
-            } catch (err) { githubLastUpdate = "Unavailable"; }
+    let githubLastUpdate  = "";
+    let githubCommitCount = "";
 
-            try {
-                const response = await fetch('https://api.github.com/repos/FailedRifle/math/commits?sha=main&per_page=100');
-                const commits = await response.json();
-                githubCommitCount = Array.isArray(commits) ? commits.length : "Not found";
-            } catch (err) { githubCommitCount = "Unavailable"; }
+    async function getFailedRifleStats() {
+        try {
+            const commitRes = await fetch('https://api.github.com/repos/FailedRifle/math/commits/main');
+            const commitData = await commitRes.json();
+            const formatter = new Intl.DateTimeFormat('en-US', {
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: 'numeric', minute: '2-digit', hour12: true,
+                timeZone: 'America/New_York', timeZoneName: 'short'
+            });
+            githubLastUpdate = formatter.format(new Date(commitData.commit.committer.date)).replace(',', '');
+        } catch { githubLastUpdate = "Unavailable"; }
+        try {
+            const response = await fetch('https://api.github.com/repos/FailedRifle/math/commits?sha=main&per_page=100');
+            const commits = await response.json();
+            githubCommitCount = Array.isArray(commits) ? commits.length : "Not found";
+        } catch { githubCommitCount = "Unavailable"; }
+    }
+    getFailedRifleStats();
+
+    const ANNOUNCEMENT_TEXT = "test";
+    
+    (function() {
+        const area = document.getElementById("announcement-area");
+        if (!ANNOUNCEMENT_TEXT.trim()) { area.innerHTML = ""; return; }
+        area.innerHTML = `
+            <div class="log-line">&nbsp;</div>
+            <div class="log-line" style="color:var(--dos-red)">[NOTICE] ${ANNOUNCEMENT_TEXT}</div>
+        `;
+    })();
+
+    // ── Game blobs ───────────────────────────────────────────────
+    const fnaeHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/fnae.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const mcHTML   = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/minecraft.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const nzHTML   = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/nz-zombies.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const gdHTML   = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/geometry-dash.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const sm64HTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/sm64.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const sr3dHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/snow-rider-3d.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const tapHTML  = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/throw-a-potato.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const rbHTML   = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/retro-bowl.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const wbHTML   = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/wrestle-bros.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const brHTML   = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/buckshot-roulette.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const dhHTML   = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/drift-hunters.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const blHTML   = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/basketball-legends.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+    const btd4HTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/bloons-td-4.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
+
+    const sites = {
+        "fnae":         { name: "Five Nights at Epstein's",  enabled: true,  content: fnaeHTML  },
+        "geometrydash": { name: "Geometry Dash Lite",        enabled: true,  content: gdHTML    },
+        "minecraft":    { name: "Minecraft v1.12.2",         enabled: true,  content: mcHTML    },
+        "zombies":      { name: "CoD Zombies",               enabled: true,  content: nzHTML    },
+        "sm64":         { name: "Super Mario 64",            enabled: true,  content: sm64HTML  },
+        "potato":       { name: "Throw a Potato",            enabled: true,  content: tapHTML   },
+        "snowrider":    { name: "Snow Rider 3D",             enabled: true,  content: sr3dHTML  },
+        "retrobowl":    { name: "Retro Bowl",                enabled: true,  content: rbHTML    },
+        "wrestlebros":  { name: "Wrestle Bros",              enabled: false, content: wbHTML    },
+        "buckshot":     { name: "Buckshot Roulette",         enabled: true,  content: brHTML    },
+        "drifthunters": { name: "Drift Hunters",             enabled: true,  content: dhHTML    },
+        "basketball":   { name: "Basketball Legends 2020",   enabled: false, content: blHTML    },
+        "bloonstd4":    { name: "Bloons Tower Defense 4",    enabled: false, content: btd4HTML  },
+    };
+
+    const commandDetails = {
+        "changelog": "View recent system updates.",
+        "clear":     "Clear the terminal screen.",
+        "credits":   "View the authors and contributors.",
+        "gamelist":  "List all available games.",
+        "help":      "Display this help menu.",
+        "info":      "View repository and build information."
+    };
+
+    const inputField  = document.getElementById("terminalInput");
+    const ghostField  = document.getElementById("ghost-input");
+    const historyArea = document.getElementById("history");
+    const scrollEl    = document.getElementById("dos-shell");
+    const allSugg     = [...Object.keys(commandDetails), ...Object.keys(sites)].sort();
+
+    function smartScroll() {
+        scrollEl.scrollTop = scrollEl.scrollHeight;
+    }
+
+    function ln(text, color) {
+        const s = color ? ` style="color:${color}"` : '';
+        return `<div class="log-line"${s}>${text}</div>`;
+    }
+    const blank = () => `<div class="log-line">&nbsp;</div>`;
+
+    function changelog(...entries) {
+        return entries.map(e => `<div class="log-line">${e.split('$').join('<br>')}</div>${blank()}`).join('');
+    }
+
+    function openInBlank(siteObj) {
+        const w = window.open('about:blank', '_blank');
+        if (!w || w.closed || typeof w.closed === 'undefined') return false;
+        w.document.write(siteObj.content);
+        w.document.close();
+        return true;
+    }
+
+    async function fakeLoad(siteKey) {
+        isLaunching = true;
+        inputField.disabled = true;
+        const sd = sites[siteKey];
+        const ob = document.createElement("div");
+        historyArea.appendChild(ob);
+
+        if (!sd.enabled) {
+            ob.innerHTML += ln(`'${sd.name}' is not currently available.`, 'var(--dos-red)');
+            ob.innerHTML += ln(`This game has been taken offline because of an error.`, 'var(--dos-yellow)');
+            ob.innerHTML += ln(`Please check back next update to see the status of the game.`, 'var(--dos-yellow)');
+            isLaunching = false; inputField.disabled = false; inputField.focus(); smartScroll(); return;
         }
 
-        getFailedRifleStats();
-
-        const ANNOUNCEMENT_TEXT = "CheddarOS's UI will be completely revamped";
-
-        function displayAnnouncement() {
-            const area = document.getElementById("announcement-area");
-            if (!area) return;
-            
-            if (ANNOUNCEMENT_TEXT.trim() !== "") {
-                area.innerHTML = `
-                    <div class="log-line" style="color: #FF0000; font-weight: bold; margin-top: 2px;">${ANNOUNCEMENT_TEXT}</div>
-                    <div class="log-line" style="line-height: 0.8;">&nbsp;</div>
-                `;
-            } else {
-                area.innerHTML = "";
-            }
-        }
-
-        displayAnnouncement();
-
-        const fnaeHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/fnae.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
-        const mcHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/minecraft.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
-        const nzHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/nz-zombies.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
-        const gdHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/geometry-dash.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
-        const sm64HTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/sm64.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
-        const sr3dHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/snow-rider-3d.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
-        const tapHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/throw-a-potato.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
-        const rbHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/retro-bowl.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;        
-        const wbHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/wrestle-bros.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
-        const brHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/buckshot-roulette.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
-        const dhHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/drift-hunters.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
-        const blHTML = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/basketball-legends.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
-        const btd4 = `<!DOCTYPE html><html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;}</style></head><body><script>const link='https://cdn.jsdelivr.net/gh/FailedRifle/html5@main/bloons-td-4.html';fetch(link).then(r=>r.text()).then(d=>{document.open();document.write(d);document.close();});<\/script></body></html>`;
-        
-        const sites = {
-            "fnae": { name: "Five Nights at Epstein's", enabled: true,  content: fnaeHTML},
-            "geometrydash": { name: "Geometry Dash Lite", enabled: true,  content: gdHTML},
-            "minecraft": { name: "Minecraft v1.12.2", enabled: true,  content: mcHTML},
-            "zombies": { name: "CoD Zombies", enabled: true,  content: nzHTML},
-            "sm64": { name: "Super Mario 64", enabled: true,  content: sm64HTML},
-            "potato": { name: "Throw a Potato", enabled: true,  content: tapHTML },
-            "snowrider": { name: "Snow Rider 3D", enabled: true,  content: sr3dHTML},
-            "retrobowl": { name: "Retro Bowl", enabled: true,  content: rbHTML},
-            "wrestlebros": { name: "Wrestle Bros", enabled: false,  content: wbHTML},
-            "buckshot": { name: "Buckshot Roulette", enabled: true,  content: brHTML},
-            "drifthunters": { name: "Drift Hunters", enabled: true,  content: dhHTML},
-            "basketball": { name: "Basketball Legends 2020", enabled: false,  content: blHTML},
-            "bloonstd4": { name: "Bloons Tower Defense 4", enabled: false,  content: blHTML},
-        };
-
-        const commandDetails = {
-            "changelog": "View recent system updates.",
-            "clear":     "Clear the terminal screen.",
-            "credits":   "View the authors and contributors.",
-            "gamelist":  "List all available games.",
-            "help":      "Display this help menu.",
-            "info":      "View repository and build information."
-        };
-
-        const inputField = document.getElementById("terminalInput");
-        const ghostField = document.getElementById("ghost-input");
-        const historyArea = document.getElementById("history");
-        const ui = document.getElementById("gdocs-scroll");
-        document.getElementById("page-title-display").innerText = "CheddarOS " + OS_VERSION;
-
-        function smartScroll() {
-            const threshold = 120;
-            const nearBottom = ui.scrollHeight - ui.scrollTop - ui.clientHeight < threshold;
-            if (nearBottom) ui.scrollTop = ui.scrollHeight;
-        }
-        const allSuggestions = [...Object.keys(commandDetails), ...Object.keys(sites)].sort();
-
-        function changelog(...entries) {
-            return entries.map(e => {
-                const formatted = e.split('$').join('<br>');
-                return `<div class="log-line">${formatted}</div><div class="log-line"> </div>`;
-            }).join('');
-        }
-
-        function openInBlank(siteObj) {
-            const newWin = window.open('about:blank', '_blank');
-            if (!newWin || newWin.closed || typeof newWin.closed == 'undefined') return false;
-            newWin.document.write(siteObj.content);
-            newWin.document.close();
-            return true;
-        }
-
-        async function fakeLoad(siteKey) {
-            isLaunching = true;
-            inputField.disabled = true;
-            const siteData = sites[siteKey];
-
-            const outputBlock = document.createElement("div");
-            outputBlock.className = "cmd-output-block";
-            historyArea.appendChild(outputBlock);
-
-            if (!siteData.enabled) {
-                outputBlock.innerHTML += '<div class="log-line" style="color:#FF5555;">Sorry! ' + siteData.name + ' is currently unavailable.</div>';
-                outputBlock.innerHTML += '<div class="log-line" style="color:#FFAA00;">This game has been taken offline because of an error.</div>';
-                outputBlock.innerHTML += '<div class="log-line" style="color:#FFAA00;">Please check back next update to see the status of the game.</div>';
-                isLaunching = false;
-                inputField.disabled = false;
-                inputField.focus();
-                smartScroll();
-                return;
-            }
-
-            const totalAssets = Math.floor(siteData.content.length / 2);
-            const duration = Math.min((totalAssets / 300) * 1500, 4000);
-
-            outputBlock.innerHTML += '<div class="log-line">Searching for ' + siteData.name + '...</div>';
-
-            const loadLine = document.createElement("div");
-            loadLine.className = "log-line";
-            outputBlock.appendChild(loadLine);
-
-            const startTime = Date.now();
-            while (true) {
-                const elapsed  = Date.now() - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                const current  = Math.floor(progress * totalAssets);
-                loadLine.innerText = 'LOADING ASSETS: [' + current + '/' + totalAssets + ']';
-                smartScroll();
-                if (progress >= 1) break;
-                await new Promise(r => setTimeout(r, Math.random() > 0.9 ? 60 : 15));
-            }
-
-            const success = openInBlank(siteData);
-
-            if (success) {
-                outputBlock.innerHTML += '<div class="log-line" style="color:#00FF00;">' + siteData.name + ' launched successfully.</div>';
-            } else {
-                outputBlock.innerHTML += '<div class="log-line" style="color:#FF5555;">ERROR: Popup was blocked by browser.</div>';
-                outputBlock.innerHTML += '<div class="log-line" style="color:#FF5555;">Please allow popups and type "' + siteKey + '" again.</div>';
-            }
-
-            isLaunching = false;
-            inputField.disabled = false;
-            inputField.focus();
-        }
-
-        inputField.addEventListener('input', function() {
-            const val = inputField.value.toLowerCase();
-            if (!val) { ghostField.innerText = ""; return; }
-            const match = allSuggestions.find(s => s.startsWith(val));
-            ghostField.innerText = match ? val + match.slice(val.length) : "";
-        });
-
-        inputField.addEventListener('keydown', function(e) {
-            if (isLaunching) return;
-            if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                if (cmdHistory.length > 0 && historyIdx < cmdHistory.length - 1) {
-                    historyIdx++;
-                    inputField.value = cmdHistory[cmdHistory.length - 1 - historyIdx];
-                }
-            } else if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                if (historyIdx > 0) {
-                    historyIdx--;
-                    inputField.value = cmdHistory[cmdHistory.length - 1 - historyIdx];
-                } else {
-                    historyIdx = -1;
-                    inputField.value = "";
-                }
-            } else if (e.key === 'Tab') {
-                e.preventDefault();
-                if (ghostField.innerText) { inputField.value = ghostField.innerText; ghostField.innerText = ""; }
-            } else if (e.key === 'Enter') {
-                ghostField.innerText = "";
-                handleInput();
-            }
-        });
-
-        function handleInput() {
-            const rawInput = inputField.value.trim();
-            if (rawInput === "") return;
-            cmdHistory.push(rawInput);
-            historyIdx = -1;
-            const userInput   = rawInput.toLowerCase();
-
-            historyArea.innerHTML += '<div class="log-line"><span style="color:#202124;">cheddar&gt;</span> ' + rawInput + '</div>';
-            const outputBlock = document.createElement("div");
-            outputBlock.className = "cmd-output-block";
-            historyArea.appendChild(outputBlock);
-
-            if (userInput === "help") {
-                const keys = Object.keys(commandDetails).sort();
-                let lastLetter = "";
-
-                keys.forEach(cmd => {
-                    const currentLetter = cmd[0].toLowerCase();
-                    if (lastLetter !== "" && currentLetter !== lastLetter) {
-                        outputBlock.innerHTML += '<div class="log-line" style="margin-bottom:0; line-height:0.5;">&nbsp;</div>';
-                    }
-                    lastLetter = currentLetter;
-
-                    outputBlock.innerHTML += `
-                        <div class="log-line" style="display:grid; grid-template-columns: 150px 1fr; margin-bottom:0; line-height:1.2;">
-                            <span>${cmd}</span>
-                            <span>${commandDetails[cmd]}</span>
-                        </div>`;
-                });
-            }
-            else if (userInput === "clear") {
-                historyArea.innerHTML = "";
-                outputBlock.remove();
-            }
-            else if (userInput === "info") {
-                outputBlock.innerHTML += `
-                    <div class="log-line" style="color: #ffc567; font-weight: bold; margin-bottom: 4px;">CheddarOS</div>
-                    <div class="log-line" style="display:grid; grid-template-columns: 150px 1fr; line-height:0.8;">
-                        <span>System-Version</span>
-                        <span>${OS_VERSION}</span>
-                    </div>
-                    <div class="log-line" style="display:grid; grid-template-columns: 150px 1fr; line-height:0.8;">
-                        <span>Version</span>
-                        <span>${githubCommitCount}</span>
-                    </div>
-                    <div class="log-line" style="display:grid; grid-template-columns: 150px 1fr; line-height:0.8;">
-                        <span>Last Updated</span>
-                        <span>${githubLastUpdate}</span>
-                    </div>
-                    <div class="log-line" style="display:grid; grid-template-columns: 150px 1fr; line-height:0.8;">
-                        <span>Blocked Counter</span>
-                        <span>1</span>
-                    </div>
-                `;
-            }
-            else if (userInput === "credits") {
-                outputBlock.innerHTML += changelog(
-                    "--- CREDITS ---$CheddarOS" + OS_VERSION,
-                    "Lead Programmer$- Matt Hauber (Cheddar Hobbs)",
-                    "Testers$- James Ethan$- Jadell Vargas (Jelly)$- Vinny Nucci (Vinchenzo)$- Max Dankies$",
-                    "DISCLAIMER$All Testers are not affiliated in any way$with the delveopment of CheddarOS.$The development of CheddarOS is solely by the Lead Programmer",
-                );
-            }
-            else if (userInput === "changelog") {
-                outputBlock.innerHTML += changelog(
-                    "--- CHANGELOG ---",
-                    "3/14/2026$vALPHA-2.1.3$- Fixed Bloons TD4",
-                    "3/13/2026$vALPHA-2.1.2$- Added Bloons TD4$- Fixed formatting$- Minor bug fixes",
-                    "3/11/2026$vALPHA-2.1.1$- Added Basketball Legends$- Basketball Legends offline while looking for GoGuardian bypass",
-                    "3/9/2026$vALPHA-2.1.0$- Completely changed how games load$- Games load faster than ever$- Reduced lag in every game and inside CheddarOS$- Fixed GoGuardian bypass for Buckshot Roulette$- Shell Shockers removed",
-                    "3/8/2026$vALPHA-2.0.3$- Added Drift Hunters",
-                    "3/7/2026$vALPHA-2.0.2$- Added a info command to see more information about CheddarOS",
-                    "3/7/2026$vALPHA-2.0.1$- Formatted the games and the help list to look more professional$- Added an announcement text that will appear when you first load. (if there is an announcement)$- Minor bug fixes related towards the offline games and GoGouardian bypasses.",
-                    "3/4/2026$vALPHA-2.0.0$ - Completely revamped the UI$- Changed tab name and icon",
-                    "2/27/2026$vALPHA-1.1.0$- Massive Code Cleanup",
-                    "2/27/2026$vALPHA-1.0.10$- Added Buckshot Roulette$- Buckshot Roulette offline while working on GoGuardian bypass",
-                    "2/27/2026$vALPHA-1.0.9$- Added Wrestle Bros$- Wrestle Bros offline while working on GoGuardian bypass",
-                    "2/27/2026$vALPHA-1.0.8$- Formatted the credits screen",
-                    "2/26/2026$vALPHA-1.0.7$- Added Shell Shockers$- Shell Shockers offline while working on GoGuardian bypass",
-                    "2/26/2026$vALPHA-1.0.6$- Added Retro Bowl",
-                    "2/26/2026$vALPHA-1.0.5b$- Minor bug fixes$- Cut the loading speed in half.",
-                    "2/25/2026$vALPHA-1.0.5$- Throw a Potato fixed$- Removed ads$- FNaE revamp$- Fixed Snow Rider 3D black screen",
-                    "2/25/2026$vALPHA-1.0.4$- FNaE back online",
-                    "2/25/2026$vALPHA-1.0.3$- FNaE taken offline$- Throw a Potato offline (GoGuardian)",
-                    "2/23/2026$vALPHA-1.0.2$- Minor fixes$- Throw a Potato playable$- Added Snow Rider 3D (WIP)",
-                    "2/23/2026$vALPHA-1.0.1$- Throw a Potato maintenance",
-                    "2/23/2026$vALPHA-1.0.0$- CheddarOS early private access release."
-                );
-            }
-            else if (userInput === "gamelist") {
-                const keys = Object.keys(sites).sort();
-                
-                const groups = {};
-                keys.forEach(key => {
-                    const firstChar = key[0].toLowerCase();
-                    if (!groups[firstChar]) groups[firstChar] = [];
-                    groups[firstChar].push(key);
-                });
-
-                const sortedLetters = Object.keys(groups).sort();
-                
-                sortedLetters.forEach((letter, index) => {
-                    if (index > 0) {
-                        outputBlock.innerHTML += '<div class="log-line" style="margin-bottom:0; line-height:0.5;">&nbsp;</div>';
-                    }
-
-                    const subgroup = groups[letter].sort((a, b) => {
-                        if (sites[a].enabled === sites[b].enabled) return a.localeCompare(b);
-                        return sites[a].enabled ? -1 : 1;
-                    });
-
-                    subgroup.forEach(key => {
-                        const status = sites[key].enabled ? '' : ' [OFFLINE]';
-                        const name = sites[key].name;
-                        const color = sites[key].enabled ? '#202124' : '#FF5555';
-                        
-                        outputBlock.innerHTML += `
-                            <div class="log-line" style="display:grid; grid-template-columns: 150px 1fr; color:${color}; margin-bottom:0; line-height:1.2;">
-                                <span>${key}</span>
-                                <span>(${name})${status}</span>
-                            </div>`;
-                    });
-                });
-            }
-            else if (sites[userInput]) {
-                outputBlock.remove();
-                fakeLoad(userInput);
-            }
-            else {
-                outputBlock.innerHTML += '<div class="log-line">"' + rawInput + '" is not recognized as a valid command.</div>';
-            }
-
-            inputField.value = "";
+        const total    = Math.floor(sd.content.length / 2);
+        const duration = Math.min((total / 300) * 1500, 4000);
+        ob.innerHTML  += ln(`Searching for ${sd.name}...`);
+        const loadLine = document.createElement("div");
+        loadLine.className = "log-line";
+        ob.appendChild(loadLine);
+        const t0 = Date.now();
+        while (true) {
+            const p   = Math.min((Date.now() - t0) / duration, 1);
+            const cur = Math.floor(p * total);
+            const W   = 30;
+            const bar = '█'.repeat(Math.floor(p * W)) + '░'.repeat(W - Math.floor(p * W));
+            loadLine.innerHTML = `<span style="color:var(--dos-cyan)">[${bar}]</span> ${cur}/${total}`;
             smartScroll();
+            if (p >= 1) break;
+            await new Promise(r => setTimeout(r, Math.random() > 0.9 ? 60 : 15));
         }
-    </script>
+        const ok = openInBlank(sd);
+        ob.innerHTML += ok
+            ? ln(`${sd.name} launched successfully.`, 'var(--dos-green)')
+            : ln(`ERROR: Popup was blocked by browser.`, 'var(--dos-red)') + ln(`Please allow popups and type "${siteKey}" again.`, 'var(--dos-red)');
+        isLaunching = false; inputField.disabled = false; inputField.focus(); smartScroll();
+    }
+
+    inputField.addEventListener('input', () => {
+        const val = inputField.value.toLowerCase();
+        if (!val) { ghostField.innerText = ""; return; }
+        const m = allSugg.find(s => s.startsWith(val));
+        ghostField.innerText = m ? val + m.slice(val.length) : "";
+    });
+
+    inputField.addEventListener('keydown', e => {
+        if (isLaunching) return;
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (cmdHistory.length > 0 && historyIdx < cmdHistory.length - 1) {
+                historyIdx++;
+                inputField.value = cmdHistory[cmdHistory.length - 1 - historyIdx];
+            }
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (historyIdx > 0) { historyIdx--; inputField.value = cmdHistory[cmdHistory.length - 1 - historyIdx]; }
+            else { historyIdx = -1; inputField.value = ""; }
+        } else if (e.key === 'Tab') {
+            e.preventDefault();
+            if (ghostField.innerText) { inputField.value = ghostField.innerText; ghostField.innerText = ""; }
+        } else if (e.key === 'Enter') {
+            ghostField.innerText = ""; handleInput();
+        }
+    });
+
+    function handleInput() {
+        const rawInput = inputField.value.trim();
+        if (rawInput === "") return;
+        cmdHistory.push(rawInput);
+        historyIdx = -1;
+        const userInput = rawInput.toLowerCase();
+        cmdRunCount++;
+
+        historyArea.innerHTML += ln(`C:\\CheddarOS&gt; ${rawInput}`);
+        const ob = document.createElement("div");
+        historyArea.appendChild(ob);
+
+        if (userInput === "help") {
+            ob.innerHTML += blank();
+            let lastLetter = "";
+            Object.keys(commandDetails).sort().forEach(cmd => {
+                const cur = cmd[0].toLowerCase();
+                if (lastLetter !== "" && cur !== lastLetter) ob.innerHTML += blank();
+                lastLetter = cur;
+                ob.innerHTML += `<div class="log-line" style="display:grid;grid-template-columns:160px 1fr;line-height:1.35;">
+                    <span style="color:var(--dos-yellow)">${cmd}</span>
+                    <span>${commandDetails[cmd]}</span>
+                </div>`;
+            });
+            ob.innerHTML += blank();
+        }
+        else if (userInput === "clear") {
+            historyArea.innerHTML = ""; ob.remove();
+        }
+        else if (userInput === "info") {
+            ob.innerHTML += blank();
+            ob.innerHTML += ln("CheddarOS System Information", 'var(--dos-yellow)');
+            ob.innerHTML += `<div class="log-line" style="display:grid;grid-template-columns:160px 1fr;line-height:1.35;"><span>System-Version</span><span>${OS_VERSION}</span></div>`;
+            ob.innerHTML += `<div class="log-line" style="display:grid;grid-template-columns:160px 1fr;line-height:1.35;"><span>Version</span><span>${githubCommitCount}</span></div>`;
+            ob.innerHTML += `<div class="log-line" style="display:grid;grid-template-columns:160px 1fr;line-height:1.35;"><span>Last Updated</span><span>${githubLastUpdate}</span></div>`;
+            ob.innerHTML += `<div class="log-line" style="display:grid;grid-template-columns:160px 1fr;line-height:1.35;"><span>Blocked Counter</span><span>1</span></div>`;
+            ob.innerHTML += blank();
+        }
+        else if (userInput === "credits") {
+            ob.innerHTML += blank() + changelog(
+                "--- CREDITS ---$CheddarOS " + OS_VERSION,
+                "Lead Programmer$- Matt Hauber (Cheddar Hobbs)",
+                "Testers$- James Ethan$- Jadell Vargas (Jelly)$- Vinny Nucci (Vinchenzo)$- Max Dankies$",
+                "DISCLAIMER$All Testers are not affiliated in any way$with the development of CheddarOS.$The development of CheddarOS is solely by the Lead Programmer",
+            );
+        }
+        else if (userInput === "changelog") {
+            ob.innerHTML += blank() + changelog(
+                "--- CHANGELOG ---",
+                "3/14/2026$vALPHA-2.1.3$- Fixed Bloons TD4",
+                "3/13/2026$vALPHA-2.1.2$- Added Bloons TD4$- Fixed formatting$- Minor bug fixes",
+                "3/11/2026$vALPHA-2.1.1$- Added Basketball Legends$- Basketball Legends offline while looking for GoGuardian bypass",
+                "3/9/2026$vALPHA-2.1.0$- Completely changed how games load$- Games load faster than ever$- Reduced lag in every game and inside CheddarOS$- Fixed GoGuardian bypass for Buckshot Roulette$- Shell Shockers removed",
+                "3/8/2026$vALPHA-2.0.3$- Added Drift Hunters",
+                "3/7/2026$vALPHA-2.0.2$- Added a info command to see more information about CheddarOS",
+                "3/7/2026$vALPHA-2.0.1$- Formatted the games and the help list to look more professional$- Added an announcement text$- Minor bug fixes",
+                "3/4/2026$vALPHA-2.0.0$- Completely revamped the UI$- Changed tab name and icon",
+                "2/27/2026$vALPHA-1.1.0$- Massive Code Cleanup",
+                "2/27/2026$vALPHA-1.0.10$- Added Buckshot Roulette",
+                "2/27/2026$vALPHA-1.0.9$- Added Wrestle Bros",
+                "2/27/2026$vALPHA-1.0.8$- Formatted the credits screen",
+                "2/26/2026$vALPHA-1.0.7$- Added Shell Shockers",
+                "2/26/2026$vALPHA-1.0.6$- Added Retro Bowl",
+                "2/26/2026$vALPHA-1.0.5b$- Minor bug fixes$- Cut the loading speed in half.",
+                "2/25/2026$vALPHA-1.0.5$- Throw a Potato fixed$- Removed ads$- FNaE revamp$- Fixed Snow Rider 3D black screen",
+                "2/25/2026$vALPHA-1.0.4$- FNaE back online",
+                "2/25/2026$vALPHA-1.0.3$- FNaE taken offline$- Throw a Potato offline (GoGuardian)",
+                "2/23/2026$vALPHA-1.0.2$- Minor fixes$- Throw a Potato playable$- Added Snow Rider 3D (WIP)",
+                "2/23/2026$vALPHA-1.0.1$- Throw a Potato maintenance",
+                "2/23/2026$vALPHA-1.0.0$- CheddarOS early private access release."
+            );
+        }
+        else if (userInput === "gamelist") {
+            ob.innerHTML += blank();
+            const groups = {};
+            Object.keys(sites).sort().forEach(key => {
+                const fc = key[0].toLowerCase();
+                if (!groups[fc]) groups[fc] = [];
+                groups[fc].push(key);
+            });
+            Object.keys(groups).sort().forEach((letter, i) => {
+                if (i > 0) ob.innerHTML += blank();
+                groups[letter].sort((a, b) => {
+                    if (sites[a].enabled === sites[b].enabled) return a.localeCompare(b);
+                    return sites[a].enabled ? -1 : 1;
+                }).forEach(key => {
+                    const col   = sites[key].enabled ? 'var(--dos-gray)' : 'var(--dos-red)';
+                    const badge = sites[key].enabled ? '' : ' <span style="color:var(--dos-red)">[OFFLINE]</span>';
+                    ob.innerHTML += `<div class="log-line" style="display:grid;grid-template-columns:160px 1fr;color:${col};line-height:1.35;">
+                        <span style="color:var(--dos-yellow)">${key}</span>
+                        <span>(${sites[key].name})${badge}</span>
+                    </div>`;
+                });
+            });
+            ob.innerHTML += blank();
+        }
+        else if (sites[userInput]) {
+            ob.remove(); fakeLoad(userInput);
+        }
+        else {
+            ob.innerHTML += ln(`'${rawInput}' is not recognized as an internal or external command,`);
+            ob.innerHTML += ln(`operable program or batch file.`);
+            ob.innerHTML += blank();
+        }
+
+        inputField.value = "";
+        smartScroll();
+    }
+</script>
 </body>
 </html>
