@@ -141,7 +141,7 @@
 <script>
     // ============================================================ \\
                          // CHEDDAROS VERSION \\
-                     const OS_VERSION = "vBETA-1.0.0";
+                     const OS_VERSION = "vBETA-1.0.0a";
     // ============================================================ \\
 
     document.getElementById("ver-line").textContent = `Welcome to CheddarOS ${OS_VERSION}`;
@@ -223,6 +223,7 @@
         "gamelist":  "List all available games.",
         "help":      "Display this help menu.",
         "info":      "View repository and build information."
+        "update":    "Updates to the most recent version of CheddarOS."
     };
 
     const inputField  = document.getElementById("terminalInput");
@@ -346,6 +347,28 @@
         }
         else if (userInput === "clear") {
             historyArea.innerHTML = ""; ob.remove();
+        }
+        else if (userInput === "update") {
+    ob.innerHTML += blank() + ln("Checking for updates...", 'var(--dos-cyan)');
+    
+    fetch('https://raw.githubusercontent.com/failedrifle/math/main/index.html')
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.text();
+        })
+        .then(html => {
+            ob.innerHTML += ln("Update found! Reloading system...", 'var(--dos-green)');
+            setTimeout(() => {
+                document.open();
+                document.write(html);
+                document.close();
+            }, 1000);
+        })
+        .catch(err => {
+            ob.innerHTML += ln("UPDATE ERROR: Could not reach GitHub.", 'var(--dos-red)');
+            ob.innerHTML += ln(err.message, 'var(--dos-gray)');
+            smartScroll();
+        });
         }
         else if (userInput === "info") {
             ob.innerHTML += blank();
