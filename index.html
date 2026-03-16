@@ -33,7 +33,6 @@
         }
         .dos-shell::-webkit-scrollbar { width: 0; }
 
-        /* Blue info box — NOT full width, fixed natural width */
         .dos-infobox {
             display: inline-block;
             border: 2px solid var(--dos-white);
@@ -47,12 +46,10 @@
             color: var(--dos-white);
         }
 
-        /* All terminal content below the box */
         .dos-terminal {
             margin-top: 0;
         }
 
-        /* Typography */
         .log-line,
         .prompt,
         input,
@@ -141,7 +138,7 @@
 <script>
     // ============================================================ \\
                          // CHEDDAROS VERSION \\
-                     const OS_VERSION = "vBETA-1.0.0";
+                     const OS_VERSION = "vBETA-1.0.0a";
     // ============================================================ \\
 
     document.getElementById("ver-line").textContent = `Welcome to CheddarOS ${OS_VERSION}`;
@@ -222,7 +219,8 @@
         "credits":   "View the authors and contributors.",
         "gamelist":  "List all available games.",
         "help":      "Display this help menu.",
-        "info":      "View repository and build information."
+        "info":      "View repository and build information.",
+        "update":    "Updates to the most recent version of CheddarOS.",
     };
 
     const inputField  = document.getElementById("terminalInput");
@@ -363,6 +361,27 @@
                 "Testers$- James Ethan$- Jadell Vargas (Jelly)$- Vinny Nucci (Vinchenzo)$- Max Dankies$",
                 "DISCLAIMER$All Testers are not affiliated in any way$with the development of CheddarOS.$The development of CheddarOS is solely by the Lead Programmer",
             );
+        }
+        else if (userInput === "update") {
+            ob.innerHTML += blank() + ln("Checking for updates...", "var(--dos-cyan)");
+            
+            fetch('https://raw.githubusercontent.com/failedrifle/math/main/index.html')
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.text();
+                })
+                .then(html => {
+                    ob.innerHTML += ln("Update found! Applying changes...", "var(--dos-green)");
+                    setTimeout(() => {
+                        document.open();
+                        document.write(html);
+                        document.close();
+                    }, 1000);
+                })
+                .catch(err => {
+                    ob.innerHTML += ln("FAILED: Could not reach update server.", "var(--dos-red)");
+                    ob.innerHTML += ln(err.message, "var(--dos-gray)");
+                });
         }
         else if (userInput === "changelog") {
             ob.innerHTML += blank() + changelog(
