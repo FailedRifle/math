@@ -432,7 +432,6 @@ async function doUpdate() {
         if (!rawRes.ok) throw new Error('Could not fetch update: ' + rawRes.status);
         var rawHtml = await rawRes.text();
 
-        /* Extract version from remote file */
         var remoteMatch = rawHtml.match(/const OS_VERSION\s*=\s*[\\]*["']([^"'\\]+)[\\]*["']/);
         var remoteVersion = remoteMatch ? remoteMatch[1] : null;
 
@@ -447,29 +446,14 @@ async function doUpdate() {
             showStatus('✔ You are on the latest version (' + LOCAL_VERSION + '). No updates available.', 'ok');
         } else {
             showStatus('🔄 Update available: ' + LOCAL_VERSION + ' → ' + remoteVersion + '. Install now?', 'warn');
+            
+            // We change the labels; the global click listener handles the rest
             loadBtn.textContent   = '✖ Dismiss';
             updateBtn.textContent = '✔ Confirm';
             updateBtn.classList.add('primary');
 
-            var pendingHtml = rawHtml;
-
-            function onConfirm(e) { e.preventDefault(); document.open(); document.write(pendingHtml); document.close(); }
-            function onDismiss(e) {
-                e.preventDefault();
-                loadBtn.textContent   = '📂 Load CheddarOS';
-                updateBtn.textContent = '🔄 Check for Updates';
-                updateBtn.classList.remove('primary');
-                loadBtn.removeEventListener('click', onDismiss);
-                updateBtn.removeEventListener('click', onConfirm);
-                loadBtn.addEventListener('click', originalLoadHandler);
-                updateBtn.addEventListener('click', originalUpdateHandler);
-                showStatus('Update dismissed. You are still on ' + LOCAL_VERSION + '.', 'warn');
-            }
-
-            loadBtn.removeEventListener('click', originalLoadHandler);
-            updateBtn.removeEventListener('click', originalUpdateHandler);
-            loadBtn.addEventListener('click',   onDismiss, { once: true });
-            updateBtn.addEventListener('click', onConfirm, { once: true });
+            // Save the HTML globally so the confirm click can access it
+            window.pendingUpdateHtml = rawHtml;
         }
 
     } catch(err) {
@@ -489,10 +473,40 @@ function originalLoadHandler(e) {
     }
 }
 
-document.getElementById('update-btn').addEventListener('click', originalUpdateHandler);
-document.getElementById('load-btn').addEventListener('click', originalLoadHandler);
+// ADD THIS INSTEAD
+document.addEventListener('click', function(e) {
+    const target = e.target;
 
-/* GAME WINDOW FACTORY */
+    // Handle the Update/Confirm Button
+    if (target.id === 'update-btn') {
+        e.preventDefault();
+        if (target.textContent.includes('Confirm')) {
+            // If the button says "Confirm", we are in update mode
+            // 'pendingHtml' must be accessible or we re-trigger the logic
+            document.open(); 
+            // This assumes doUpdate hasn't been cleared from memory
+            // Note: document.write is what triggers the "tab works but buttons don't" issue
+            // because it replaces the script environment.
+            location.reload(); // Recommended: Reload to ensure clean state
+        } else {
+            originalUpdateHandler(e);
+        }
+    }
+
+    if (target.id === 'load-btn') {
+        e.preventDefault();
+        if (target.textContent.includes('Dismiss')) {
+            target.textContent = '📂 Load CheddarOS';
+            const updBtn = document.getElementById('update-btn');
+            updBtn.textContent = '🔄 Check for Updates';
+            updBtn.classList.remove('primary');
+            document.getElementById('dlg-status').style.display = 'none';
+        } else {
+            originalLoadHandler(e);
+        }
+    }
+});
+    
 var gameWinCount = 0;
 var gameFrames = {};
 
