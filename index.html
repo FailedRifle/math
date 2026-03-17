@@ -192,7 +192,7 @@ body {
     <div class="xp-win" id="login-win">
         <div class="title-bar" id="login-tb">
             <span class="tb-icon">🧀</span>
-            <span class="tb-text">CheddarOS Update v1.0.6</span>
+            <span class="tb-text">CheddarOS.exe</span>
             <div class="tb-btns">
                 <div class="tb-btn tb-btn-min" onclick="minWin('login-win')">&#8211;</div>
                 <div class="tb-btn tb-btn-max">□</div>
@@ -233,8 +233,8 @@ body {
             <div class="popup-row">
                 <div class="popup-icon">✅</div>
                 <div class="popup-text">
-                    <b>Portal is already loaded.</b><br>
-                    The CheddarOS portal is currently open in Internet Explorer. No action needed.
+                    <b>CheddarOS is already loaded.</b><br>
+                    You cannot run two instances of CheddarOS.
                 </div>
             </div>
             <div class="popup-btns">
@@ -243,7 +243,6 @@ body {
         </div>
     </div>
 
-    <!-- CMD WINDOW (CheddarOS Terminal) -->
     <div class="xp-win" id="ie-win">
         <div class="title-bar" id="ie-tb">
             <span class="tb-icon">🖥️</span>
@@ -408,19 +407,17 @@ function showStatus(msg, type) {
     el.textContent=msg; el.className='dlg-status '+type; el.style.display='block';
 }
 
-/* Extract local version from the embedded portal HTML */
-var localVersionMatch = PORTAL_HTML.match(/const OS_VERSION\s*=\s*["']([^"']+)["']/);
+var localVersionMatch = PORTAL_HTML.match(/const OS_VERSION\s*=\s*[\\]*["']([^"'\\]+)[\\]*["']/);
 var LOCAL_VERSION = localVersionMatch ? localVersionMatch[1] : 'unknown';
 
-/* Update the dialog subtext with the current version */
 (function() {
     var p = document.querySelector('#login-win .dlg-text p');
     if (p) p.textContent = 'Current version: ' + LOCAL_VERSION;
 })();
 
 async function doUpdate() {
-    var updateBtn  = document.getElementById('update-btn');
-    var loadBtn    = document.getElementById('load-btn');
+    var updateBtn = document.getElementById('update-btn');
+    var loadBtn   = document.getElementById('load-btn');
     updateBtn.disabled = true; loadBtn.disabled = true;
     document.getElementById('dlg-status').style.display = 'none';
 
@@ -428,72 +425,47 @@ async function doUpdate() {
     await runProgressBar(600 + Math.random() * 400);
 
     try {
-        /* Step 1: get repo file listing */
-        var contentsRes = await fetch('https://api.github.com/repos/FailedRifle/math/contents/');
-        if (!contentsRes.ok) throw new Error('GitHub API returned ' + contentsRes.status);
-        var contents = await contentsRes.json();
-
-        /* Step 2: find the main HTML file */
-        var htmlFiles = contents.filter(function(f) { return f.name && f.name.endsWith('.html'); });
-        if (htmlFiles.length === 0) {
-            showStatus('⚠ No HTML file found in repository. Cannot check for updates.', 'warn');
-            updateBtn.disabled = false; loadBtn.disabled = false; return;
-        }
-
-        /* Prefer a file whose name contains "cheddar" or "xp", otherwise take first */
-        var target = htmlFiles.find(function(f) {
-            var n = f.name.toLowerCase();
-            return n.includes('cheddar') || n.includes('xp');
-        }) || htmlFiles[0];
-
-        document.getElementById('prog-label').textContent = 'Fetching latest build (' + target.name + ')…';
+        document.getElementById('prog-label').textContent = 'Fetching latest build…';
         await runProgressBar(400 + Math.random() * 300);
 
-        /* Step 3: download the raw file */
-        var rawRes = await fetch(target.download_url);
-        if (!rawRes.ok) throw new Error('Could not download file: ' + rawRes.status);
+        var rawRes = await fetch('https://raw.githubusercontent.com/FailedRifle/math/main/index.html');
+        if (!rawRes.ok) throw new Error('Could not fetch update: ' + rawRes.status);
         var rawHtml = await rawRes.text();
 
-        /* Step 4: extract version from remote file */
-        var remoteMatch = rawHtml.match(/const OS_VERSION\s*=\s*["']([^"']+)["']/);
+        /* Extract version from remote file */
+        var remoteMatch = rawHtml.match(/const OS_VERSION\s*=\s*[\\]*["']([^"'\\]+)[\\]*["']/);
         var remoteVersion = remoteMatch ? remoteMatch[1] : null;
 
         updateBtn.disabled = false; loadBtn.disabled = false;
 
         if (!remoteVersion) {
-            showStatus('⚠ Could not read version from remote file (' + target.name + ').', 'warn');
+            showStatus('⚠ Could not read version from remote file.', 'warn');
             return;
         }
 
         if (remoteVersion === LOCAL_VERSION) {
             showStatus('✔ You are on the latest version (' + LOCAL_VERSION + '). No updates available.', 'ok');
-            updateBtn.disabled = false; loadBtn.disabled = false;
         } else {
-            /* Update available — swap buttons to Confirm / Dismiss */
             showStatus('🔄 Update available: ' + LOCAL_VERSION + ' → ' + remoteVersion + '. Install now?', 'warn');
-            loadBtn.textContent  = '✖ Dismiss';
+            loadBtn.textContent   = '✖ Dismiss';
             updateBtn.textContent = '✔ Confirm';
             updateBtn.classList.add('primary');
-            updateBtn.disabled = false;
-            loadBtn.disabled   = false;
 
             var pendingHtml = rawHtml;
 
             function onConfirm(e) { e.preventDefault(); document.open(); document.write(pendingHtml); document.close(); }
             function onDismiss(e) {
                 e.preventDefault();
-                /* Restore original buttons */
                 loadBtn.textContent   = '📂 Load CheddarOS';
                 updateBtn.textContent = '🔄 Check for Updates';
+                updateBtn.classList.remove('primary');
                 loadBtn.removeEventListener('click', onDismiss);
                 updateBtn.removeEventListener('click', onConfirm);
-                /* Re-attach original load behaviour */
                 loadBtn.addEventListener('click', originalLoadHandler);
                 updateBtn.addEventListener('click', originalUpdateHandler);
                 showStatus('Update dismissed. You are still on ' + LOCAL_VERSION + '.', 'warn');
             }
 
-            /* Detach normal handlers, attach confirm/dismiss ones */
             loadBtn.removeEventListener('click', originalLoadHandler);
             updateBtn.removeEventListener('click', originalUpdateHandler);
             loadBtn.addEventListener('click',   onDismiss, { once: true });
@@ -520,12 +492,11 @@ function originalLoadHandler(e) {
 document.getElementById('update-btn').addEventListener('click', originalUpdateHandler);
 document.getElementById('load-btn').addEventListener('click', originalLoadHandler);
 
-/* ── GAME WINDOW FACTORY ─────────────────────────────────────────────── */
+/* GAME WINDOW FACTORY */
 var gameWinCount = 0;
-var gameFrames = {};  // id → iframe element, so we can kill it on close
+var gameFrames = {};
 
 function closeGameWin(id) {
-    // Blank the iframe first to kill audio/execution, then remove
     var frame = gameFrames[id];
     if (frame) {
         frame.srcdoc = '';
@@ -549,7 +520,6 @@ function makeGameWindow(name, key, content) {
     var rszId = id + '-rsz';
     var frameId = id + '-frame';
 
-    // Stagger new windows so they don't stack exactly
     var offset = (gameWinCount - 1) * 24;
     var left = Math.min(120 + offset, window.innerWidth - 900);
     var top  = Math.min(30  + offset, window.innerHeight - 580);
@@ -580,7 +550,6 @@ function makeGameWindow(name, key, content) {
     var frame = document.getElementById(frameId);
     frame.srcdoc = content;
     gameFrames[id] = frame;
-
 
     var rsz = document.getElementById(rszId);
     var rsOn=false, rsW, rsH, rsX, rsY;
