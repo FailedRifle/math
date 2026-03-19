@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CheddarOS</title>
+<title>CheddarOS Shell</title>
 <style>
 /* --- CORE STYLES --- */
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -93,7 +93,7 @@ body {
 
 .dlg-btn-row { display: flex; justify-content: flex-end; gap: 5px; border-top: 1px solid #b8b5aa; padding-top: 9px; }
 .dlg-btn { height: 23px; padding: 0 14px; font-size: 11px; cursor: pointer; border-radius: 3px; border: 1px solid #707070; }
-.dlg-btn.primary { font-weight: bold; border-color: #316ac5; background: #c8dcf8; }
+.dlg-btn.primary { font-weight: bold; background: #c8dcf8; }
 
 #ie-win { width: 850px; height: 560px; top: 38px; left: 90px; display: none; }
 .cmd-body { flex: 1; background: #000; }
@@ -137,7 +137,7 @@ body {
             </div>
         </div>
         <div class="cmd-body">
-            <iframe id="ie-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+            <iframe id="ie-frame"></iframe>
         </div>
         <div class="rsz" id="ie-rsz"></div>
     </div>
@@ -152,10 +152,11 @@ body {
 </div>
 
 <script>
-/* --- CONFIG --- */
-const RAW_CONSOLE_URL = 'https://raw.githubusercontent.com/FailedRifle/math/main/console.html';
-const CURRENT_VERSION = "vBETA-1.0.0e";
-let loadedContent = null;
+/* --- CONFIGURATION --- */
+const CONSOLE_URL = 'https://raw.githubusercontent.com/FailedRifle/math/main/console.html';
+const INDEX_URL   = 'https://raw.githubusercontent.com/FailedRifle/math/main/index.html';
+const LOCAL_VERSION = "vBETA-1.0.0e";
+
 let ztop = 100;
 const ws = {};
 
@@ -174,7 +175,7 @@ function regWin(id, lbl, ico) {
     ws[id] = { min: false };
     const b = document.createElement('div');
     b.className = 'tb-item active'; b.id = 'tb-' + id;
-    b.innerHTML = `<span>${ico}</span><span style="overflow:hidden;text-overflow:ellipsis;flex:1">${lbl}</span>`;
+    b.innerHTML = `<span>${ico}</span><span>${lbl}</span>`;
     b.onclick = () => front(id);
     document.getElementById('tb-items').appendChild(b);
 }
@@ -183,18 +184,16 @@ function closeWin(id) {
     document.getElementById(id).style.display = 'none';
     const b = document.getElementById('tb-' + id);
     if (b) b.remove();
-    if (id === 'ie-win') loadedContent = null;
     delete ws[id];
 }
 
 function showUpdate() {
-    const w = document.getElementById('login-win');
-    w.style.display = 'flex';
+    document.getElementById('login-win').style.display = 'flex';
     regWin('login-win', 'Update', '🧀');
     front('login-win');
 }
 
-/* --- UPDATE & LOAD LOGIC --- */
+/* --- LOGIC: FETCH & VERSION DETECTION --- */
 function showStatus(msg, type) {
     const el = document.getElementById('dlg-status');
     el.textContent = msg;
@@ -204,66 +203,85 @@ function showStatus(msg, type) {
 
 function extractVersion(text) {
     const match = text.match(/const OS_VERSION\s*=\s*["']([^"']+)["']/);
-    return match ? match[1] : "Unknown";
+    return match ? match[1] : null;
+}
+
+async function doFullReset() {
+    showStatus("CRITICAL: Version mismatch. Refreshing system...", "warn");
+    try {
+        const res = await fetch(INDEX_URL);
+        const code = await res.text();
+        document.open();
+        document.write(code);
+        document.close();
+    } catch (e) {
+        location.reload(); // Fallback to standard reload
+    }
 }
 
 async function checkUpdates() {
-    const updBtn = document.getElementById('update-btn');
-    updBtn.disabled = true;
-    showStatus("Checking GitHub for updates...", "warn");
+    const btn = document.getElementById('update-btn');
+    btn.disabled = true;
+    showStatus("Checking repository for changes...", "warn");
 
     try {
-        const response = await fetch(RAW_CONSOLE_URL);
-        const code = await response.text();
+        const res = await fetch(CONSOLE_URL);
+        const code = await res.text();
         const remoteVersion = extractVersion(code);
 
-        if (remoteVersion === CURRENT_VERSION) {
-            showStatus(`CheddarOS is up to date (${CURRENT_VERSION}).`, "ok");
-            updBtn.textContent = "✅ Up to Date";
+        if (remoteVersion && remoteVersion !== LOCAL_VERSION) {
+            showStatus(`New version detected (${remoteVersion}). Resetting...`, "warn");
+            setTimeout(doFullReset, 1500);
         } else {
-            showStatus(`Update available: ${CURRENT_VERSION} → ${remoteVersion}`, "warn");
-            updBtn.textContent = "🔄 Update Found";
-            updBtn.classList.add('primary');
+            showStatus(`System is up to date (${LOCAL_VERSION}).`, "ok");
+            btn.textContent = "✅ Updated";
         }
     } catch (err) {
-        showStatus("Update check failed. Check connection.", "err");
+        showStatus("Update check failed.", "err");
     }
-    updBtn.disabled = false;
+    btn.disabled = false;
 }
 
 async function loadPortal() {
     const btn = document.getElementById('load-btn');
     btn.disabled = true;
-    showStatus("Connecting to repository...", "warn");
+    showStatus("Fetching console from GitHub...", "warn");
 
     try {
-        const response = await fetch(RAW_CONSOLE_URL);
-        if (!response.ok) throw new Error();
-        const code = await response.text();
-        loadedContent = code;
+        const res = await fetch(CONSOLE_URL);
+        if (!res.ok) throw new Error();
+        const code = await res.text();
+        
+        // Version Check on Load
+        const remoteVersion = extractVersion(code);
+        if (remoteVersion && remoteVersion !== LOCAL_VERSION) {
+            doFullReset();
+            return;
+        }
 
-        const ieWin = document.getElementById('ie-win');
-        ieWin.style.display = 'flex';
+        // Inject into internal window
+        const win = document.getElementById('ie-win');
+        win.style.display = 'flex';
         regWin('ie-win', 'C:\\CheddarOS', '🖥️');
         front('ie-win');
 
-        const doc = document.getElementById('ie-frame').contentWindow.document;
-        doc.open();
-        doc.write(code);
-        doc.close();
+        const frameDoc = document.getElementById('ie-frame').contentWindow.document;
+        frameDoc.open();
+        frameDoc.write(code);
+        frameDoc.close();
 
-        showStatus("CheddarOS loaded successfully.", "ok");
+        showStatus("CheddarOS Online.", "ok");
     } catch (err) {
-        showStatus("Error: Could not load console from GitHub.", "err");
+        showStatus("Failed to reach repository.", "err");
     }
     btn.disabled = false;
 }
 
-/* --- INTERACTION --- */
+/* --- INTERFACE --- */
 document.getElementById('update-btn').onclick = checkUpdates;
 document.getElementById('load-btn').onclick = loadPortal;
 
-function drag(tbId, winId) {
+function makeDraggable(tbId, winId) {
     const tb = document.getElementById(tbId), win = document.getElementById(winId);
     let ox, oy, sx, sy, on = false;
     tb.onmousedown = (e) => {
@@ -275,14 +293,14 @@ function drag(tbId, winId) {
     document.onmousemove = (e) => { if (!on) return; win.style.left = (ox + e.clientX - sx) + 'px'; win.style.top = (oy + e.clientY - sy) + 'px'; };
     document.onmouseup = () => on = false;
 }
-drag('login-tb', 'login-win');
-drag('ie-tb', 'ie-win');
+makeDraggable('login-tb', 'login-win');
+makeDraggable('ie-tb', 'ie-win');
 
 window.addEventListener('message', (e) => {
     if (e.data?.type === 'cheddar-launch') {
-        const gameTab = window.open('about:blank', '_blank');
-        gameTab.document.write(e.data.content);
-        gameTab.document.close();
+        const game = window.open('about:blank', '_blank');
+        game.document.write(e.data.content);
+        game.document.close();
     }
 });
 
